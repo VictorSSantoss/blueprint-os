@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import type { Room, FloorObject } from '../types';
 import { polygonArea } from './geometry';
+import { formatArea } from './format';
 import type { Language } from '../i18n';
 
 interface ExportOptions {
@@ -68,11 +69,11 @@ export async function exportToPdf(
 
   // Calculate stats
   const completedRooms = rooms.filter((r) => r.isComplete);
-  let totalArea = 0;
+  let totalAreaCm2 = 0;
 
   for (const room of completedRooms) {
     const corners = room.corners.map((c) => c.position);
-    totalArea += polygonArea(corners) / 10000; // Convert to m²
+    totalAreaCm2 += polygonArea(corners);
   }
 
   // Stats in a single line
@@ -81,8 +82,8 @@ export async function exportToPdf(
   pdf.setTextColor(80);
 
   const statsText = language === 'en'
-    ? `${completedRooms.length} Rooms  •  ${totalArea.toFixed(1)} m²  •  ${objects.length} Objects`
-    : `${completedRooms.length} Cômodos  •  ${totalArea.toFixed(1)} m²  •  ${objects.length} Objetos`;
+    ? `${completedRooms.length} Rooms  •  ${formatArea(totalAreaCm2)}  •  ${objects.length} Objects`
+    : `${completedRooms.length} Cômodos  •  ${formatArea(totalAreaCm2)}  •  ${objects.length} Objetos`;
 
   pdf.text(statsText, margin, footerY - 5);
 

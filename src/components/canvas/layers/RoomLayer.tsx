@@ -3,6 +3,7 @@ import { useProjectStore, useSelectionStore, useCanvasStore } from '../../../sto
 import { PIXELS_PER_CM, COLORS, ROOM_HANDLE_NAME, ROOM_WALL_NAME } from '../../../constants';
 import { distance, polygonArea, midpoint } from '../../../utils/geometry';
 import { snapToNearestCorner, CORNER_SNAP_TOLERANCE_CM } from '../../../utils/linking';
+import { formatArea, formatLength } from '../../../utils/format';
 import type { Room, Point } from '../../../types';
 
 interface RoomShapeProps {
@@ -34,7 +35,6 @@ function RoomShape({ room, allRooms, isSelected, isHovered, zoom, showDimensions
 
   // Calculate room area
   const areaCm2 = polygonArea(corners.map((c) => c.position));
-  const areaM2 = areaCm2 / 10000;
 
   // Calculate centroid for area label
   const centroid = points.reduce(
@@ -140,7 +140,7 @@ function RoomShape({ room, allRooms, isSelected, isHovered, zoom, showDimensions
               <Text
                 x={mid.x + perpX * labelOffset}
                 y={mid.y + perpY * labelOffset}
-                text={wallLength >= 100 ? `${(wallLength / 100).toFixed(2)}m` : `${Math.round(wallLength)}cm`}
+                text={formatLength(wallLength)}
                 fontSize={11 / zoom}
                 fill={COLORS.dimension.text}
                 offsetX={20}
@@ -216,7 +216,7 @@ function RoomShape({ room, allRooms, isSelected, isHovered, zoom, showDimensions
           )}
           {showDimensions && (
             <Text
-              text={`${areaM2.toFixed(2)} m²`}
+              text={formatArea(areaCm2)}
               fontSize={14 / zoom}
               fill={COLORS.dimension.text}
               fontStyle="bold"

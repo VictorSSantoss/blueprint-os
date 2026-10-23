@@ -251,3 +251,4 @@ No project JSON schema change. `settingsStore` persist key renamed: `'floor-make
 - 2026-10-23: Draft created.
 - 2026-10-23: Approved by Victor.
 - 2026-10-23: Implemented. Two deviation notes: (1) `exportPdf.ts` had Turkish locale comparisons — fixed to `'en'`/`'pt-BR'`. (2) Two new translation keys added (`pdfExportSuccess`, `pdfExportError`) to eliminate hardcoded toast strings in `Header.tsx`.
+- 2026-10-23: Correction. The "no `.toFixed(2)` remains" DoD item had been ticked without checking the canvas. Room and wall labels on the canvas, the ruler, the drawing previews and the PDF footer still printed dots or centimetres. They now use `formatArea` / `formatLength`, which makes the DoD item true.

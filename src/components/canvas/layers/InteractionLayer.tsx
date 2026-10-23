@@ -2,6 +2,7 @@ import { Group, Line, Rect, Circle, Text } from 'react-konva';
 import { useToolStore, useCanvasStore } from '../../../stores';
 import { PIXELS_PER_CM, COLORS } from '../../../constants';
 import { distance } from '../../../utils/geometry';
+import { formatLength } from '../../../utils/format';
 import { useTranslation } from '../../../stores';
 
 const SNAP_INDICATOR_COLOR = '#22c55e';
@@ -65,7 +66,7 @@ export function InteractionLayer() {
             x={rulerMidX - 50 / zoom}
             y={rulerMidY - rulerLabelOffset - 8 / zoom}
             width={100 / zoom}
-            text={rulerLengthCm >= 100 ? `${(rulerLengthCm / 100).toFixed(2)}m` : `${Math.round(rulerLengthCm)}cm`}
+            text={formatLength(rulerLengthCm)}
             fontSize={14 / zoom}
             fill="#ffffff"
             fontStyle="bold"
@@ -92,8 +93,8 @@ export function InteractionLayer() {
       {showRectangle && (
         <Group>
           <Rect x={rectX} y={rectY} width={rectW} height={rectH} fill={COLORS.selection.fill} stroke={COLORS.selection.stroke} strokeWidth={2 / zoom} dash={[8 / zoom, 4 / zoom]} />
-          <Text x={rectX + rectW / 2 - 30} y={rectY - 25 / zoom} text={`${Math.round(rectWcm)}cm`} fontSize={12 / zoom} fill={COLORS.selection.stroke} align="center" />
-          <Text x={rectX + rectW + 10 / zoom} y={rectY + rectH / 2 - 6} text={`${Math.round(rectHcm)}cm`} fontSize={12 / zoom} fill={COLORS.selection.stroke} />
+          <Text x={rectX + rectW / 2 - 30} y={rectY - 25 / zoom} text={formatLength(rectWcm)} fontSize={12 / zoom} fill={COLORS.selection.stroke} align="center" />
+          <Text x={rectX + rectW + 10 / zoom} y={rectY + rectH / 2 - 6} text={formatLength(rectHcm)} fontSize={12 / zoom} fill={COLORS.selection.stroke} />
           <Circle x={rectStartX} y={rectStartY} radius={6 / zoom} fill="#22c55e" stroke={COLORS.selection.stroke} strokeWidth={2 / zoom} />
           <Circle x={rectEndX}   y={rectEndY}   radius={6 / zoom} fill="#ffffff" stroke={COLORS.selection.stroke} strokeWidth={2 / zoom} />
           <Text x={rectX + rectW / 2 - 40} y={rectY + rectH + 10 / zoom} text={t('releaseToFinish')} fontSize={11 / zoom} fill="#6b7280" />
@@ -112,7 +113,7 @@ export function InteractionLayer() {
               return (
                 <Group key={index}>
                   <Line points={[point.x, point.y, nextPoint.x, nextPoint.y]} stroke={COLORS.selection.stroke} strokeWidth={2 / zoom} dash={[8 / zoom, 4 / zoom]} />
-                  <Text x={midX} y={midY - 20 / zoom} text={`${Math.round(lengthCm)}cm`} fontSize={12 / zoom} fill={COLORS.selection.stroke} align="center" />
+                  <Text x={midX} y={midY - 20 / zoom} text={formatLength(lengthCm)} fontSize={12 / zoom} fill={COLORS.selection.stroke} align="center" />
                 </Group>
               );
             })}
