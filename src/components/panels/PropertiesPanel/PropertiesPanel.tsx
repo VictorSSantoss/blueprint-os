@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useSelectionStore, useProjectStore, useCanvasStore, useSettingsStore } from '../../../stores';
-import { OBJECT_CATALOG } from '../../../constants';
+import { OBJECT_CATALOG, DEFAULT_LOT_CM } from '../../../constants';
 import { polygonArea, polygonPerimeter } from '../../../utils/geometry';
-import { formatArea, formatLength, formatAreaForInput } from '../../../utils/format';
+import { formatArea, formatLength, formatAreaForInput, formatLengthForInput, formatPercent } from '../../../utils/format';
+import { buildableRect, occupancyRatio, parseLengthInput, roomsOutsideSetbacks, validateLot } from '../../../utils/lot';
 import { parseAreaInput, compareToTarget } from '../../../utils/programme';
 import { Trash2Icon, RotateCwIcon, CopyIcon } from 'lucide-react';
-import type { FloorObject, Room } from '../../../types';
+import type { FloorObject, Lot, Room } from '../../../types';
+import type { TranslationKey } from '../../../i18n';
 import { getLocalizedObjectName } from '../../../utils/objectNames';
 
 function TargetAreaField({ room, areaCm2 }: { room: Room; areaCm2: number }) {
@@ -460,6 +462,166 @@ function ProgrammeTable() {
   );
 }
 
+function LengthField({
+  id,
+  label,
+  valueCm,
+  onCommit,
+}: {
+  id: string;
+  label: string;
+  valueCm: number;
+  onCommit: (cm: number) => TranslationKey | null;
+}) {
+  const { t } = useSettingsStore();
+  const [draft, setDraft] = useState<string | null>(null);
+  const [error, setError] = useState<TranslationKey | null>(null);
+
+  const commit = () => {
+    if (draft === null) return;
+    const cm = parseLengthInput(draft);
+    const err = cm === null ? 'invalidLength' : onCommit(cm);
+    if (err) {
+      setError(err);
+      return;
+    }
+    setDraft(null);
+    setError(null);
+  };
+
+  return (
+    <div>
+      <label htmlFor={id} className="block text-xs text-ink-secondary mb-1">{label}</label>
+      <input
+        id={id}
+        type="text"
+        inputMode="decimal"
+        value={draft ?? formatLengthForInput(valueCm)}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') {
+            setDraft(null);
+            setError(null);
+          }
+        }}
+        aria-invalid={error !== null}
+        className={`w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 ${
+          error ? 'border-ember focus:ring-ember' : 'border-line focus:ring-teal'
+        }`}
+      />
+      {error && <p className="mt-1 text-xs text-ember">{t(error)}</p>}
+    </div>
+  );
+}
+
+function LotSection() {
+  const { rooms, lot, setLot, removeLot } = useProjectStore();
+  const { t } = useSettingsStore();
+
+  const figures = useMemo(() => {
+    if (!lot) return null;
+    const b = buildableRect(lot);
+    const occupiedCm2 = rooms
+      .filter((r) => r.isComplete)
+      .reduce((sum, r) => sum + polygonArea(r.corners.map((c) => c.position)), 0);
+    return {
+      lotCm2: lot.width * lot.depth,
+      buildableCm2: b.width * b.height,
+      occupiedCm2,
+      ratio: occupancyRatio(occupiedCm2, lot),
+      outside: roomsOutsideSetbacks(rooms, lot),
+    };
+  }, [rooms, lot]);
+
+  if (!lot || !figures) {
+    return (
+      <div>
+        <h4 className="text-xs font-medium text-ink-secondary uppercase mb-2">{t('lot')}</h4>
+        <button
+          onClick={() =>
+            setLot({
+              origin: { x: 0, y: 0 },
+              width: DEFAULT_LOT_CM.width,
+              depth: DEFAULT_LOT_CM.depth,
+              setbacks: { ...DEFAULT_LOT_CM.setbacks },
+            })
+          }
+          className="w-full px-3 py-1.5 text-sm rounded bg-teal text-ink-inverse hover:bg-teal-deep"
+        >
+          {t('defineLot')}
+        </button>
+      </div>
+    );
+  }
+
+  const fields: { id: string; label: TranslationKey; value: number; apply: (cm: number) => Lot }[] = [
+    { id: 'lot-width', label: 'lotWidth', value: lot.width, apply: (cm) => ({ ...lot, width: cm }) },
+    { id: 'lot-depth', label: 'lotDepth', value: lot.depth, apply: (cm) => ({ ...lot, depth: cm }) },
+    { id: 'lot-front', label: 'setbackFront', value: lot.setbacks.front, apply: (cm) => ({ ...lot, setbacks: { ...lot.setbacks, front: cm } }) },
+    { id: 'lot-back', label: 'setbackBack', value: lot.setbacks.back, apply: (cm) => ({ ...lot, setbacks: { ...lot.setbacks, back: cm } }) },
+    { id: 'lot-left', label: 'setbackLeft', value: lot.setbacks.left, apply: (cm) => ({ ...lot, setbacks: { ...lot.setbacks, left: cm } }) },
+    { id: 'lot-right', label: 'setbackRight', value: lot.setbacks.right, apply: (cm) => ({ ...lot, setbacks: { ...lot.setbacks, right: cm } }) },
+  ];
+
+  return (
+    <div>
+      <h4 className="text-xs font-medium text-ink-secondary uppercase mb-2">{t('lot')}</h4>
+      <div className="grid grid-cols-2 gap-2">
+        {fields.map((f) => (
+          <LengthField
+            key={f.id}
+            id={f.id}
+            label={t(f.label)}
+            valueCm={f.value}
+            onCommit={(cm) => {
+              const next = f.apply(cm);
+              const err = validateLot(next);
+              if (err) return err;
+              setLot(next);
+              return null;
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="mt-3 space-y-1 text-sm">
+        <div className="flex justify-between">
+          <span className="text-ink-secondary">{t('lotArea')}</span>
+          <span className="font-medium">{formatArea(figures.lotCm2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-ink-secondary">{t('buildableArea')}</span>
+          <span className="font-medium">{formatArea(figures.buildableCm2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-ink-secondary">{t('occupiedArea')}</span>
+          <span className="font-medium">{formatArea(figures.occupiedCm2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-ink-secondary">{t('occupancyRate')}</span>
+          <span className="font-semibold">{formatPercent(figures.ratio)}</span>
+        </div>
+      </div>
+
+      {figures.outside.length > 0 && (
+        <p className="mt-2 p-2 rounded bg-ember-wash text-sm text-ember">
+          {t('outsideSetback')} {figures.outside.map((r) => r.name || t('room')).join(', ')}
+        </p>
+      )}
+      <p className="mt-2 text-xs text-ink-faint">{t('areaMeasurementNote')}</p>
+
+      <button
+        onClick={() => confirm(t('confirmRemoveLot')) && removeLot()}
+        className="mt-2 text-xs text-ember hover:underline"
+      >
+        {t('removeLot')}
+      </button>
+    </div>
+  );
+}
+
 function RoomStatistics() {
   const { rooms, objects } = useProjectStore();
   const { t } = useSettingsStore();
@@ -504,6 +666,8 @@ function RoomStatistics() {
       </div>
 
       {completedRoomCount > 0 && <ProgrammeTable />}
+
+      <LotSection />
 
       {rooms.length === 0 && (
         <div className="mt-4 p-3 bg-hover rounded-lg text-sm text-ink-secondary">

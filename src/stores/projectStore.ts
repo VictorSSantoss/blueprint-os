@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import type { Room, FloorObject, DimensionLine, Point, ObjectType } from '../types';
+import type { Room, FloorObject, DimensionLine, Point, ObjectType, Lot } from '../types';
 import { OBJECT_CATALOG } from '../constants/objects';
 import { moveLinkedCorners, isValidRoom } from '../utils/linking';
 
@@ -11,6 +11,8 @@ interface ProjectState {
   rooms: Room[];
   objects: FloorObject[];
   dimensionLines: DimensionLine[];
+  /** The project's lot (FDD-0004); absent until the user defines one. */
+  lot?: Lot;
 
   // Room actions
   addRoom: (room: Omit<Room, 'id'>) => string;
@@ -57,7 +59,18 @@ interface ProjectState {
   // Project actions
   setProjectName: (name: string) => void;
   clearProject: () => void;
-  loadProject: (data: { rooms: Room[]; objects: FloorObject[]; dimensionLines: DimensionLine[] }) => void;
+  loadProject: (data: { rooms: Room[]; objects: FloorObject[]; dimensionLines: DimensionLine[]; lot?: Lot }) => void;
+
+  // Lot actions (FDD-0004)
+  /** Creates or replaces the lot. Callers validate it first with `validateLot`. */
+  setLot: (lot: Lot) => void;
+  /**
+   * Moves the lot without changing its size or setbacks.
+   *
+   * @param delta - Translation in whole centimetres.
+   */
+  moveLot: (delta: { dx: number; dy: number }) => void;
+  removeLot: () => void;
 
   // Getters
   getObjectById: (id: string) => FloorObject | undefined;
@@ -70,6 +83,7 @@ const createDefaultProject = () => ({
   rooms: [],
   objects: [],
   dimensionLines: [],
+  lot: undefined,
 });
 
 export const useProjectStore = create<ProjectState>()(
@@ -270,7 +284,22 @@ export const useProjectStore = create<ProjectState>()(
           rooms: data.rooms,
           objects: data.objects,
           dimensionLines: data.dimensionLines,
+          lot: data.lot,
         });
+      },
+
+      setLot: (lot) => {
+        set({ lot });
+      },
+
+      moveLot: ({ dx, dy }) => {
+        const { lot } = get();
+        if (!lot) return;
+        set({ lot: { ...lot, origin: { x: lot.origin.x + dx, y: lot.origin.y + dy } } });
+      },
+
+      removeLot: () => {
+        set({ lot: undefined });
       },
 
       getObjectById: (id) => {
@@ -289,6 +318,7 @@ export const useProjectStore = create<ProjectState>()(
         rooms: state.rooms,
         objects: state.objects,
         dimensionLines: state.dimensionLines,
+        lot: state.lot,
       }),
     }
   )

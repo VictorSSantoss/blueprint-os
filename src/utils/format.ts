@@ -48,7 +48,7 @@ export function formatLength(cm: number): string {
   return `${LENGTH_FORMATTER.format(cm / 100)} m`;
 }
 
-const INPUT_AREA_FORMATTER = new Intl.NumberFormat('pt-BR', {
+const INPUT_NUMBER_FORMATTER = new Intl.NumberFormat('pt-BR', {
   maximumFractionDigits: 2,
   useGrouping: false,
 });
@@ -63,5 +63,35 @@ const INPUT_AREA_FORMATTER = new Intl.NumberFormat('pt-BR', {
  * formatAreaForInput(140000) // → "14"
  */
 export function formatAreaForInput(cm2: number): string {
-  return INPUT_AREA_FORMATTER.format(cm2 / 10000);
+  return INPUT_NUMBER_FORMATTER.format(cm2 / 10000);
+}
+
+/**
+ * Formats a length as an editable pt-BR number in metres, without unit or forced decimals.
+ *
+ * @param cm - Length in whole centimetres.
+ * @returns Text for an input field, e.g. `"1,5"`.
+ * @example
+ * formatLengthForInput(150) // → "1,5"
+ */
+export function formatLengthForInput(cm: number): string {
+  return INPUT_NUMBER_FORMATTER.format(cm / 100);
+}
+
+const PERCENT_FORMATTER = new Intl.NumberFormat('pt-BR', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/**
+ * Formats a fraction as a pt-BR percentage with one decimal.
+ *
+ * @param fraction - A ratio such as 0.273.
+ * @returns Formatted string, e.g. `"27,3%"`.
+ * @example
+ * formatPercent(0.2733) // → "27,3%"
+ */
+export function formatPercent(fraction: number): string {
+  return PERCENT_FORMATTER.format(fraction);
 }

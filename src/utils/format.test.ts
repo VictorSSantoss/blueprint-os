@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatArea, formatLength, formatAreaForInput } from './format';
+import { formatArea, formatLength, formatAreaForInput, formatLengthForInput, formatPercent } from './format';
 
 describe('formatArea', () => {
   it('[FDD-0001 / AC-02] formats a 4×3 m room correctly', () => {
@@ -63,5 +63,18 @@ describe('formatAreaForInput', () => {
     expect(formatAreaForInput(145000)).toBe('14,5');
     expect(formatAreaForInput(140000)).toBe('14');
     expect(formatAreaForInput(12345678)).toBe('1234,57');
+  });
+});
+
+describe('formatPercent', () => {
+  it('[FDD-0004 / AC-04] formats the occupancy ratio with a comma', () => {
+    expect(formatPercent(0.2733)).toBe('27,3%');
+  });
+});
+
+describe('formatLengthForInput', () => {
+  it('[FDD-0004] shows a setback in metres without a unit', () => {
+    expect(formatLengthForInput(150)).toBe('1,5');
+    expect(formatLengthForInput(1200)).toBe('12');
   });
 });

@@ -14,6 +14,7 @@ import {
 import logoSvg from '../../assets/logo.svg';
 import { useCanvasStore, useProjectStore, useHistoryStore, useSettingsStore, useCanvasRefStore } from '../../stores';
 import { exportToPdf } from '../../utils/exportPdf';
+import { parseSavedLot } from '../../utils/lot';
 import { useToast } from '../Toast';
 
 export function Header() {
@@ -46,6 +47,7 @@ export function Header() {
       rooms: state.rooms,
       objects: state.objects,
       dimensionLines: state.dimensionLines,
+      lot: state.lot,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -71,6 +73,7 @@ export function Header() {
           rooms: data.rooms || [],
           objects: data.objects || [],
           dimensionLines: data.dimensionLines || [],
+          lot: parseSavedLot(data.lot),
         });
         if (data.name) {
           setProjectName(data.name);

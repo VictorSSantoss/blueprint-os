@@ -23,6 +23,16 @@ export const MIN_WALL_LENGTH = 10; // cm
 export const ROOM_HANDLE_NAME = 'room-handle';
 export const ROOM_WALL_NAME = 'room-wall';
 
+// Konva node name of the lot outline (see ROOM_HANDLE_NAME).
+export const LOT_OUTLINE_NAME = 'lot-outline';
+
+/** Starting lot for "Definir terreno" (FDD-0004 Q2): 12 × 30 m, setbacks 5 / 3 / 1,5 / 1,5 m. */
+export const DEFAULT_LOT_CM = {
+  width: 1200,
+  depth: 3000,
+  setbacks: { front: 500, back: 300, left: 150, right: 150 },
+} as const;
+
 // Angle snapping
 export const ANGLE_SNAP_DEGREES = 15;
 export const ANGLE_SNAP_TARGETS = [0, 45, 90, 135, 180, 225, 270, 315];
@@ -37,6 +47,12 @@ export const COLORS = {
     fill: '#374151',
     stroke: '#1f2937',
     selected: '#3b82f6',
+    warning: '#C45C5C',
+  },
+  lot: {
+    outline: '#2C2C2E',
+    setback: '#9C9C97',
+    buildable: 'rgba(59, 140, 140, 0.06)',
   },
   room: {
     fill: '#f3f4f6',

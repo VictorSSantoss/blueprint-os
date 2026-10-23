@@ -4,3 +4,4 @@ export * from './objects';
 export * from './dimensions';
 export * from './project';
 export * from './tools';
+export * from './lot';

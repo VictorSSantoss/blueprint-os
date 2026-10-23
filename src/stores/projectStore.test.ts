@@ -107,3 +107,33 @@ describe('moveWall', () => {
     expect(cornerPos(room.id, room.corners[1].id)).toEqual({ x: 400, y: 0 });
   });
 });
+
+describe('lot actions', () => {
+  const lot = { origin: { x: 0, y: 0 }, width: 1200, depth: 3000, setbacks: { front: 500, back: 300, left: 150, right: 150 } };
+
+  beforeEach(() => {
+    useProjectStore.setState({ lot: undefined });
+  });
+
+  it('setLot stores the lot', () => {
+    useProjectStore.getState().setLot(lot);
+
+    expect(useProjectStore.getState().lot).toEqual(lot);
+  });
+
+  it('[FDD-0004 / AC-05] moveLot translates only the origin', () => {
+    useProjectStore.getState().setLot(lot);
+
+    useProjectStore.getState().moveLot({ dx: 100, dy: -50 });
+
+    expect(useProjectStore.getState().lot).toEqual({ ...lot, origin: { x: 100, y: -50 } });
+  });
+
+  it('removeLot clears it', () => {
+    useProjectStore.getState().setLot(lot);
+
+    useProjectStore.getState().removeLot();
+
+    expect(useProjectStore.getState().lot).toBeUndefined();
+  });
+});

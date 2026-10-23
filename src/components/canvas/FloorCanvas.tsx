@@ -2,8 +2,8 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import type Konva from 'konva';
 import { useCanvasStore, useToolStore, useProjectStore, useSelectionStore, useCanvasRefStore, useSettingsStore } from '../../stores';
-import { GridLayer, RoomLayer, ObjectLayer, InteractionLayer } from './layers';
-import { PIXELS_PER_CM, COLORS, ROOM_HANDLE_NAME, ROOM_WALL_NAME } from '../../constants';
+import { GridLayer, LotLayer, RoomLayer, ObjectLayer, InteractionLayer } from './layers';
+import { PIXELS_PER_CM, COLORS, ROOM_HANDLE_NAME, ROOM_WALL_NAME, LOT_OUTLINE_NAME } from '../../constants';
 import { snapPointToGrid } from '../../utils/geometry';
 import { snapToNearestCorner, CORNER_SNAP_TOLERANCE_CM } from '../../utils/linking';
 import { nextRoomName } from '../../utils/programme';
@@ -266,7 +266,7 @@ export function FloorCanvas() {
       let target = e.target as Konva.Node | null;
       while (target && target !== stage) {
         const name = target.name?.() || '';
-        if (name.startsWith('object-') || name === ROOM_HANDLE_NAME || name === ROOM_WALL_NAME) {
+        if (name.startsWith('object-') || name === ROOM_HANDLE_NAME || name === ROOM_WALL_NAME || name === LOT_OUTLINE_NAME) {
           isClickOnObject = true;
           break;
         }
@@ -538,6 +538,7 @@ export function FloorCanvas() {
           scaleX={viewport.zoom}
           scaleY={viewport.zoom}
         >
+          <LotLayer />
           <RoomLayer />
           <ObjectLayer />
         </Layer>

@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { Group, Line, Shape, Text, Circle } from 'react-konva';
 import { useProjectStore, useSelectionStore, useCanvasStore } from '../../../stores';
 import { PIXELS_PER_CM, COLORS, ROOM_HANDLE_NAME, ROOM_WALL_NAME } from '../../../constants';
 import { distance, polygonArea, midpoint } from '../../../utils/geometry';
 import { snapToNearestCorner, CORNER_SNAP_TOLERANCE_CM } from '../../../utils/linking';
+import { roomsOutsideSetbacks } from '../../../utils/lot';
 import { formatArea, formatLength } from '../../../utils/format';
 import type { Room, Point } from '../../../types';
 
@@ -11,6 +13,7 @@ interface RoomShapeProps {
   allRooms: readonly Room[];
   isSelected: boolean;
   isHovered: boolean;
+  isOutsideSetback: boolean;
   zoom: number;
   showDimensions: boolean;
   gridSize: number;
@@ -22,7 +25,7 @@ interface RoomShapeProps {
   onWallDragEnd: (roomId: string, wallId: string, delta: { dx: number; dy: number }) => void;
 }
 
-function RoomShape({ room, allRooms, isSelected, isHovered, zoom, showDimensions, gridSize, onSelect, onHover, onCornerDragEnd, onCornerDragMove, onCornerDragCancel, onWallDragEnd }: RoomShapeProps) {
+function RoomShape({ room, allRooms, isSelected, isHovered, isOutsideSetback, zoom, showDimensions, gridSize, onSelect, onHover, onCornerDragEnd, onCornerDragMove, onCornerDragCancel, onWallDragEnd }: RoomShapeProps) {
   const { corners, walls, fillColor, isComplete, name } = room;
 
   if (corners.length < 2) return null;
@@ -44,7 +47,10 @@ function RoomShape({ room, allRooms, isSelected, isHovered, zoom, showDimensions
 
   // Wall stroke width - thin line, slightly thicker when selected
   const wallStrokeWidth = isSelected ? 3 / zoom : 2 / zoom;
-  const wallColor = isSelected ? COLORS.wall.selected : isHovered ? '#6366f1' : COLORS.wall.fill;
+  // A setback warning outranks selection: it must stay visible while the user drags the room back inside.
+  const wallColor = isOutsideSetback
+    ? COLORS.wall.warning
+    : isSelected ? COLORS.wall.selected : isHovered ? '#6366f1' : COLORS.wall.fill;
 
   return (
     <Group>
@@ -231,9 +237,14 @@ function RoomShape({ room, allRooms, isSelected, isHovered, zoom, showDimensions
 }
 
 export function RoomLayer() {
-  const { rooms, moveCorner, moveWall } = useProjectStore();
+  const { rooms, lot, moveCorner, moveWall } = useProjectStore();
   const { selectedIds, hoveredId, select, setHoveredId } = useSelectionStore();
   const { viewport, showDimensions, gridSize, setSnapHighlightPoint } = useCanvasStore();
+
+  const outsideIds = useMemo(
+    () => new Set(lot ? roomsOutsideSetbacks(rooms, lot).map((r) => r.id) : []),
+    [rooms, lot]
+  );
 
   // Selected rooms draw last so their handles and walls stay grabbable where a neighbour overlaps them.
   const drawOrder = [...rooms].sort(
@@ -249,6 +260,7 @@ export function RoomLayer() {
           allRooms={rooms}
           isSelected={selectedIds.includes(room.id)}
           isHovered={hoveredId === room.id}
+          isOutsideSetback={outsideIds.has(room.id)}
           zoom={viewport.zoom}
           showDimensions={showDimensions}
           gridSize={gridSize}
