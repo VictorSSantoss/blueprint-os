@@ -1,0 +1,11 @@
+export { DoorShape } from './DoorShape';
+export { WindowShape } from './WindowShape';
+export { BedShape } from './BedShape';
+export { SofaShape } from './SofaShape';
+export { TableShape } from './TableShape';
+export { ApplianceShape } from './ApplianceShape';
+export { BathroomShape } from './BathroomShape';
+export { StairsShape } from './StairsShape';
+export { StructuralShape } from './StructuralShape';
+export { RadiatorShape } from './RadiatorShape';
+export { DefaultShape } from './DefaultShape';

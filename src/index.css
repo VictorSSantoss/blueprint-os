@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces */
+  --color-paper: #FAFAF7;
+  --color-panel: #F5F5F0;
+  --color-header: #2C2C2E;
+  --color-header-hover: #3D3D3F;
+  --color-hover: #EEEEE9;
+
+  /* Lines (borders) */
+  --color-line: #E5E4DF;
+  --color-line-faint: #ECEAE5;
+  --color-line-header: #3D3D3F;
+
+  /* Ink (text) */
+  --color-ink: #1A1A1B;
+  --color-ink-secondary: #6B6B68;
+  --color-ink-faint: #9C9C97;
+  --color-ink-inverse: #F5F5F0;
+
+  /* Teal (accent) */
+  --color-teal: #3B8C8C;
+  --color-teal-deep: #347A7A;
+  --color-teal-wash: #E8F4F4;
+  --color-teal-mist: #D5ECEC;
+
+  /* Ember (danger) */
+  --color-ember: #C45C5C;
+  --color-ember-wash: #FAEAEA;
+
+  /* Category tints */
+  --color-cat-door: #F5E6D3;
+  --color-cat-window: #D9ECF2;
+  --color-cat-living: #E2EDDF;
+  --color-cat-bedroom: #E8E0F0;
+  --color-cat-dining: #F0E0E5;
+  --color-cat-kitchen: #D9EEF0;
+  --color-cat-bathroom: #DDE0F2;
+  --color-cat-heating: #F2DFDF;
+  --color-cat-structural: #E5E4DF;
+}
+
+:root {
+  --header-height: 48px;
+  --toolbar-height: 40px;
+  --status-bar-height: 28px;
+  --panel-width: 280px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
