@@ -18,6 +18,11 @@ export const MIN_WALL_THICKNESS = 5;
 export const MAX_WALL_THICKNESS = 50;
 export const MIN_WALL_LENGTH = 10; // cm
 
+// Konva node names of draggable room parts. FloorCanvas must not start a
+// selection box (which clears the selection) when a press lands on one.
+export const ROOM_HANDLE_NAME = 'room-handle';
+export const ROOM_WALL_NAME = 'room-wall';
+
 // Angle snapping
 export const ANGLE_SNAP_DEGREES = 15;
 export const ANGLE_SNAP_TARGETS = [0, 45, 90, 135, 180, 225, 270, 315];

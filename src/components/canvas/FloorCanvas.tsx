@@ -3,8 +3,9 @@ import { Stage, Layer, Rect } from 'react-konva';
 import type Konva from 'konva';
 import { useCanvasStore, useToolStore, useProjectStore, useSelectionStore, useCanvasRefStore } from '../../stores';
 import { GridLayer, RoomLayer, ObjectLayer, InteractionLayer } from './layers';
-import { PIXELS_PER_CM, COLORS } from '../../constants';
+import { PIXELS_PER_CM, COLORS, ROOM_HANDLE_NAME, ROOM_WALL_NAME } from '../../constants';
 import { snapPointToGrid } from '../../utils/geometry';
+import { snapToNearestCorner, CORNER_SNAP_TOLERANCE_CM } from '../../utils/linking';
 import { v4 as uuidv4 } from 'uuid';
 import type { ObjectType, Point } from '../../types';
 
@@ -21,7 +22,7 @@ export function FloorCanvas() {
   const [selectionBoxEnd, setSelectionBoxEnd] = useState<Point | null>(null);
   const justFinishedSelectionBox = useRef(false);
 
-  const { viewport, setZoom, pan, gridSize, isExporting } = useCanvasStore();
+  const { viewport, setZoom, pan, gridSize, isExporting, setSnapHighlightPoint } = useCanvasStore();
   const setStageRef = useCanvasRefStore((state) => state.setStageRef);
   const { objects } = useProjectStore();
 
@@ -52,7 +53,7 @@ export function FloorCanvas() {
     isRulerActive,
     rulerStart,
   } = useToolStore();
-  const { addRoom, addObject } = useProjectStore();
+  const { addRoom, addObject, rooms } = useProjectStore();
   const { clearSelection, selectMultiple } = useSelectionStore();
 
   // Handle resize
@@ -148,16 +149,20 @@ export function FloorCanvas() {
 
       const canvasPoint = screenToCanvas(pointer.x, pointer.y);
       const snappedPoint = snapPointToGrid(canvasPoint, gridSize);
+      // Prefer snapping to an existing corner over the grid when drawing.
+      const cornerSnap = (mode === 'draw-room' || mode === 'draw-rectangle')
+        ? snapToNearestCorner(rooms, snappedPoint, CORNER_SNAP_TOLERANCE_CM)
+        : null;
+      const finalPoint = cornerSnap ?? snappedPoint;
 
       if (mode === 'draw-room') {
         if (!isDrawing) {
-          // Start new room
-          startDrawing(snappedPoint);
+          startDrawing(finalPoint);
         } else {
           // Check if clicking near first point to close
           const firstPoint = drawingPoints[0];
           const distToFirst = Math.sqrt(
-            (snappedPoint.x - firstPoint.x) ** 2 + (snappedPoint.y - firstPoint.y) ** 2
+            (finalPoint.x - firstPoint.x) ** 2 + (finalPoint.y - firstPoint.y) ** 2
           );
 
           if (drawingPoints.length > 2 && distToFirst < gridSize * 2) {
@@ -183,9 +188,9 @@ export function FloorCanvas() {
             });
 
             finishDrawing();
+            setSnapHighlightPoint(null);
           } else {
-            // Add another point
-            addDrawingPoint(snappedPoint);
+            addDrawingPoint(finalPoint);
           }
         }
       } else if (placingObjectType) {
@@ -215,6 +220,8 @@ export function FloorCanvas() {
       addObject,
       setPlacingObject,
       clearSelection,
+      rooms,
+      setSnapHighlightPoint,
     ]
   );
 
@@ -240,7 +247,7 @@ export function FloorCanvas() {
       if (mode === 'draw-rectangle' && e.evt.button === 0) {
         const canvasPoint = screenToCanvas(pointer.x, pointer.y);
         const snappedPoint = snapPointToGrid(canvasPoint, gridSize);
-        startRectangle(snappedPoint);
+        startRectangle(snapToNearestCorner(rooms, snappedPoint, CORNER_SNAP_TOLERANCE_CM) ?? snappedPoint);
       }
 
       // Handle ruler
@@ -256,7 +263,7 @@ export function FloorCanvas() {
       let target = e.target as Konva.Node | null;
       while (target && target !== stage) {
         const name = target.name?.() || '';
-        if (name.startsWith('object-')) {
+        if (name.startsWith('object-') || name === ROOM_HANDLE_NAME || name === ROOM_WALL_NAME) {
           isClickOnObject = true;
           break;
         }
@@ -273,7 +280,7 @@ export function FloorCanvas() {
         }
       }
     },
-    [mode, setCursor, screenToCanvas, gridSize, startRectangle, startRuler, clearSelection]
+    [mode, setCursor, screenToCanvas, gridSize, startRectangle, startRuler, clearSelection, rooms]
   );
 
   // Handle mouse move
@@ -298,7 +305,17 @@ export function FloorCanvas() {
       if (mode === 'draw-rectangle' && isDrawing && rectangleStart) {
         const canvasPoint = screenToCanvas(pointer.x, pointer.y);
         const snappedPoint = snapPointToGrid(canvasPoint, gridSize);
-        updateRectangle(snappedPoint);
+        updateRectangle(snapToNearestCorner(rooms, snappedPoint, CORNER_SNAP_TOLERANCE_CM) ?? snappedPoint);
+      }
+
+      // Update snap indicator during drawing
+      if (mode === 'draw-room' || mode === 'draw-rectangle') {
+        const canvasPoint = screenToCanvas(pointer.x, pointer.y);
+        const snappedPoint = snapPointToGrid(canvasPoint, gridSize);
+        const snap = snapToNearestCorner(rooms, snappedPoint, CORNER_SNAP_TOLERANCE_CM);
+        setSnapHighlightPoint(snap);
+      } else if (mode !== 'select') {
+        setSnapHighlightPoint(null);
       }
 
       // Update ruler preview
@@ -314,7 +331,7 @@ export function FloorCanvas() {
         setSelectionBoxEnd(canvasPoint);
       }
     },
-    [mode, setCursor, placingObjectType, isDrawing, rectangleStart, screenToCanvas, gridSize, updateRectangle, isRulerActive, rulerStart, updateRuler, isSelectingBox, selectionBoxStart]
+    [mode, setCursor, placingObjectType, isDrawing, rectangleStart, screenToCanvas, gridSize, updateRectangle, isRulerActive, rulerStart, updateRuler, isSelectingBox, selectionBoxStart, rooms, setSnapHighlightPoint]
   );
 
   // Handle mouse up for rectangle and selection box

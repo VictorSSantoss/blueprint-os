@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import type { Room, FloorObject, DimensionLine, Point, ObjectType } from '../types';
 import { OBJECT_CATALOG } from '../constants/objects';
+import { moveLinkedCorners, isValidRoom } from '../utils/linking';
 
 interface ProjectState {
   id: string;
@@ -15,6 +16,8 @@ interface ProjectState {
   addRoom: (room: Omit<Room, 'id'>) => string;
   updateRoom: (id: string, updates: Partial<Room>) => void;
   deleteRoom: (id: string) => void;
+  moveCorner: (roomId: string, cornerId: string, newPosition: Point) => void;
+  moveWall: (roomId: string, wallId: string, delta: { dx: number; dy: number }) => void;
 
   // Object actions
   addObject: (type: ObjectType, position: Point) => string;
@@ -72,6 +75,51 @@ export const useProjectStore = create<ProjectState>()(
         set((state) => ({
           rooms: state.rooms.filter((room) => room.id !== id),
         }));
+      },
+
+      moveCorner: (roomId, cornerId, newPosition) => {
+        const { rooms } = get();
+        const room = rooms.find((r) => r.id === roomId);
+        if (!room) return;
+
+        const corner = room.corners.find((c) => c.id === cornerId);
+        if (!corner) return;
+
+        const from = corner.position;
+        const delta = { dx: newPosition.x - from.x, dy: newPosition.y - from.y };
+        if (delta.dx === 0 && delta.dy === 0) return;
+
+        const candidate = moveLinkedCorners(rooms, from, delta);
+        const anyInvalid = candidate.some(
+          (r, i) => r !== rooms[i] && !isValidRoom(r)
+        );
+        if (anyInvalid) return;
+
+        set({ rooms: candidate });
+      },
+
+      moveWall: (roomId, wallId, delta) => {
+        const { rooms } = get();
+        const room = rooms.find((r) => r.id === roomId);
+        if (!room) return;
+
+        const wall = room.walls.find((w) => w.id === wallId);
+        if (!wall) return;
+
+        const startCorner = room.corners.find((c) => c.id === wall.startCornerId);
+        const endCorner = room.corners.find((c) => c.id === wall.endCornerId);
+        if (!startCorner || !endCorner) return;
+
+        // Move start-linked corners, then end-linked corners.
+        let candidate = moveLinkedCorners(rooms, startCorner.position, delta);
+        candidate = moveLinkedCorners(candidate, endCorner.position, delta);
+
+        const anyInvalid = candidate.some(
+          (r, i) => r !== rooms[i] && !isValidRoom(r)
+        );
+        if (anyInvalid) return;
+
+        set({ rooms: candidate });
       },
 
       addObject: (type, position) => {

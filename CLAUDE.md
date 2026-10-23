@@ -12,7 +12,7 @@ Forked from [ahmethakanbesel/floor-maker](https://github.com/ahmethakanbesel/flo
 
 - React 19 + TypeScript (~5.9), Vite 7, Tailwind CSS v4
 - Konva via `react-konva` for the canvas
-- Zustand 5 + Immer for state; `historyStore.ts` handles undo/redo
+- Zustand 5 for state (Immer is installed but unused). `historyStore.ts` exists but is not wired up: there is no undo/redo yet.
 - jsPDF for PDF export, lucide-react for icons, framer-motion for UI motion
 - **npm, not Bun.** Upstream scripts use `bunx --bun`; rewritten to plain `vite` / `tsc` commands.
 - Fully static, no backend. Projects save as JSON files and autosave to the browser. Deployed to Vercel's free tier.

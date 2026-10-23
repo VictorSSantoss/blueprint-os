@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ViewportState, GridSize } from '../types';
+import type { ViewportState, GridSize, Point } from '../types';
 
 interface CanvasState {
   viewport: ViewportState;
@@ -22,6 +22,10 @@ interface CanvasState {
   toggleDimensions: () => void;
   toggleObjectLabels: () => void;
   setExporting: (isExporting: boolean) => void;
+
+  // Transient snap indicator — not persisted
+  snapHighlightPoint: Point | null;
+  setSnapHighlightPoint: (point: Point | null) => void;
 }
 
 const MIN_ZOOM = 0.1;
@@ -41,6 +45,7 @@ export const useCanvasStore = create<CanvasState>()(
   showDimensions: true,
   showObjectLabels: true,
   isExporting: false,
+  snapHighlightPoint: null,
 
   setZoom: (zoom, centerX, centerY) => {
     const clampedZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
@@ -127,6 +132,10 @@ export const useCanvasStore = create<CanvasState>()(
 
   setExporting: (isExporting) => {
     set({ isExporting });
+  },
+
+  setSnapHighlightPoint: (point) => {
+    set({ snapHighlightPoint: point });
   },
     }),
     {

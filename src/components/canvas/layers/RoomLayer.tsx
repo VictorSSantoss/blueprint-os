@@ -1,21 +1,27 @@
 import { Group, Line, Shape, Text, Circle } from 'react-konva';
 import { useProjectStore, useSelectionStore, useCanvasStore } from '../../../stores';
-import { PIXELS_PER_CM, COLORS } from '../../../constants';
+import { PIXELS_PER_CM, COLORS, ROOM_HANDLE_NAME, ROOM_WALL_NAME } from '../../../constants';
 import { distance, polygonArea, midpoint } from '../../../utils/geometry';
+import { snapToNearestCorner, CORNER_SNAP_TOLERANCE_CM } from '../../../utils/linking';
 import type { Room, Point } from '../../../types';
 
 interface RoomShapeProps {
   room: Room;
+  allRooms: readonly Room[];
   isSelected: boolean;
   isHovered: boolean;
   zoom: number;
   showDimensions: boolean;
+  gridSize: number;
   onSelect: (id: string, additive: boolean) => void;
   onHover: (id: string | null) => void;
-  onCornerDrag: (roomId: string, cornerId: string, newPos: Point) => void;
+  onCornerDragEnd: (roomId: string, cornerId: string, newPos: Point) => void;
+  onCornerDragMove: (rawPos: Point, excludeRoomId: string, from: Point) => void;
+  onCornerDragCancel: () => void;
+  onWallDragEnd: (roomId: string, wallId: string, delta: { dx: number; dy: number }) => void;
 }
 
-function RoomShape({ room, isSelected, isHovered, zoom, showDimensions, onSelect, onHover, onCornerDrag }: RoomShapeProps) {
+function RoomShape({ room, allRooms, isSelected, isHovered, zoom, showDimensions, gridSize, onSelect, onHover, onCornerDragEnd, onCornerDragMove, onCornerDragCancel, onWallDragEnd }: RoomShapeProps) {
   const { corners, walls, fillColor, isComplete, name } = room;
 
   if (corners.length < 2) return null;
@@ -63,7 +69,7 @@ function RoomShape({ room, isSelected, isHovered, zoom, showDimensions, onSelect
         />
       )}
 
-      {/* Walls */}
+      {/* Walls — each wall is a draggable group (drag only when room is selected) */}
       {walls.map((wall) => {
         const startCorner = corners.find((c) => c.id === wall.startCornerId);
         const endCorner = corners.find((c) => c.id === wall.endCornerId);
@@ -81,23 +87,54 @@ function RoomShape({ room, isSelected, isHovered, zoom, showDimensions, onSelect
         const wallLength = distance(startCorner.position, endCorner.position);
         const mid = midpoint(start, end);
 
-        // Calculate perpendicular offset for dimension label
         const dx = end.x - start.x;
         const dy = end.y - start.y;
         const len = Math.sqrt(dx * dx + dy * dy);
-        const perpX = -dy / len;
-        const perpY = dx / len;
+        const perpX = len > 0 ? -dy / len : 0;
+        const perpY = len > 0 ?  dx / len : 0;
         const labelOffset = 20 / zoom;
 
         return (
-          <Group key={wall.id}>
+          <Group
+            key={wall.id}
+            name={isSelected ? ROOM_WALL_NAME : undefined}
+            draggable={isSelected}
+            onDragEnd={(e) => {
+              const dxPx = e.target.x();
+              const dyPx = e.target.y();
+              e.target.position({ x: 0, y: 0 });
+              const dxCm = Math.round(dxPx / PIXELS_PER_CM / gridSize) * gridSize;
+              const dyCm = Math.round(dyPx / PIXELS_PER_CM / gridSize) * gridSize;
+              if (dxCm !== 0 || dyCm !== 0) {
+                onWallDragEnd(room.id, wall.id, { dx: dxCm, dy: dyCm });
+              }
+            }}
+            onMouseEnter={(e) => {
+              if (!isSelected) return;
+              const container = e.target.getStage()?.container();
+              if (container) container.style.cursor = 'grab';
+            }}
+            onMouseLeave={(e) => {
+              const container = e.target.getStage()?.container();
+              if (container) container.style.cursor = 'default';
+            }}
+          >
+            {/* Visible wall line */}
             <Line
               points={[start.x, start.y, end.x, end.y]}
               stroke={wallColor}
               strokeWidth={wallStrokeWidth}
               lineCap="round"
               lineJoin="round"
-              hitStrokeWidth={10 / zoom}
+              listening={false}
+            />
+            {/* Invisible hit area so the whole wall is grabbable */}
+            <Line
+              points={[start.x, start.y, end.x, end.y]}
+              stroke="transparent"
+              strokeWidth={1}
+              hitStrokeWidth={12 / zoom}
+              listening={isSelected}
             />
             {showDimensions && (
               <Text
@@ -108,13 +145,14 @@ function RoomShape({ room, isSelected, isHovered, zoom, showDimensions, onSelect
                 fill={COLORS.dimension.text}
                 offsetX={20}
                 offsetY={6}
+                listening={false}
               />
             )}
           </Group>
         );
       })}
 
-      {/* Corner handles - only show when selected */}
+      {/* Corner handles — only when selected; commit on drag end, not drag move */}
       {isSelected && corners.map((corner) => {
         const x = corner.position.x * PIXELS_PER_CM;
         const y = corner.position.y * PIXELS_PER_CM;
@@ -123,6 +161,7 @@ function RoomShape({ room, isSelected, isHovered, zoom, showDimensions, onSelect
         return (
           <Circle
             key={corner.id}
+            name={ROOM_HANDLE_NAME}
             x={x}
             y={y}
             radius={handleSize}
@@ -131,9 +170,24 @@ function RoomShape({ room, isSelected, isHovered, zoom, showDimensions, onSelect
             strokeWidth={2 / zoom}
             draggable
             onDragMove={(e) => {
-              const newX = e.target.x() / PIXELS_PER_CM;
-              const newY = e.target.y() / PIXELS_PER_CM;
-              onCornerDrag(room.id, corner.id, { x: newX, y: newY });
+              const rawX = e.target.x() / PIXELS_PER_CM;
+              const rawY = e.target.y() / PIXELS_PER_CM;
+              onCornerDragMove({ x: rawX, y: rawY }, room.id, corner.position);
+            }}
+            onDragEnd={(e) => {
+              const rawX = e.target.x() / PIXELS_PER_CM;
+              const rawY = e.target.y() / PIXELS_PER_CM;
+
+              const cornerSnap = snapToNearestCorner(allRooms, { x: rawX, y: rawY }, CORNER_SNAP_TOLERANCE_CM, room.id, corner.position);
+              const gridX = Math.round(rawX / gridSize) * gridSize;
+              const gridY = Math.round(rawY / gridSize) * gridSize;
+              const finalPos = cornerSnap ?? { x: gridX, y: gridY };
+
+              // Reset Konva node — the store update drives the re-render to the correct position.
+              e.target.position({ x: corner.position.x * PIXELS_PER_CM, y: corner.position.y * PIXELS_PER_CM });
+
+              onCornerDragCancel();
+              onCornerDragEnd(room.id, corner.id, finalPos);
             }}
             onMouseEnter={(e) => {
               const container = e.target.getStage()?.container();
@@ -177,38 +231,36 @@ function RoomShape({ room, isSelected, isHovered, zoom, showDimensions, onSelect
 }
 
 export function RoomLayer() {
-  const { rooms, updateRoom } = useProjectStore();
+  const { rooms, moveCorner, moveWall } = useProjectStore();
   const { selectedIds, hoveredId, select, setHoveredId } = useSelectionStore();
-  const { viewport, showDimensions, gridSize } = useCanvasStore();
+  const { viewport, showDimensions, gridSize, setSnapHighlightPoint } = useCanvasStore();
 
-  const handleCornerDrag = (roomId: string, cornerId: string, newPos: Point) => {
-    const room = rooms.find((r) => r.id === roomId);
-    if (!room) return;
-
-    // Snap to grid
-    const snappedX = Math.round(newPos.x / gridSize) * gridSize;
-    const snappedY = Math.round(newPos.y / gridSize) * gridSize;
-
-    const updatedCorners = room.corners.map((c) =>
-      c.id === cornerId ? { ...c, position: { x: snappedX, y: snappedY } } : c
-    );
-
-    updateRoom(roomId, { corners: updatedCorners });
-  };
+  // Selected rooms draw last so their handles and walls stay grabbable where a neighbour overlaps them.
+  const drawOrder = [...rooms].sort(
+    (a, b) => Number(selectedIds.includes(a.id)) - Number(selectedIds.includes(b.id))
+  );
 
   return (
     <Group>
-      {rooms.map((room) => (
+      {drawOrder.map((room) => (
         <RoomShape
           key={room.id}
           room={room}
+          allRooms={rooms}
           isSelected={selectedIds.includes(room.id)}
           isHovered={hoveredId === room.id}
           zoom={viewport.zoom}
           showDimensions={showDimensions}
+          gridSize={gridSize}
           onSelect={select}
           onHover={setHoveredId}
-          onCornerDrag={handleCornerDrag}
+          onCornerDragEnd={moveCorner}
+          onCornerDragMove={(rawPos, excludeRoomId, from) => {
+            const snap = snapToNearestCorner(rooms, rawPos, CORNER_SNAP_TOLERANCE_CM, excludeRoomId, from);
+            setSnapHighlightPoint(snap);
+          }}
+          onCornerDragCancel={() => setSnapHighlightPoint(null)}
+          onWallDragEnd={moveWall}
         />
       ))}
     </Group>
