@@ -1,11 +1,12 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import type Konva from 'konva';
-import { useCanvasStore, useToolStore, useProjectStore, useSelectionStore, useCanvasRefStore } from '../../stores';
+import { useCanvasStore, useToolStore, useProjectStore, useSelectionStore, useCanvasRefStore, useSettingsStore } from '../../stores';
 import { GridLayer, RoomLayer, ObjectLayer, InteractionLayer } from './layers';
 import { PIXELS_PER_CM, COLORS, ROOM_HANDLE_NAME, ROOM_WALL_NAME } from '../../constants';
 import { snapPointToGrid } from '../../utils/geometry';
 import { snapToNearestCorner, CORNER_SNAP_TOLERANCE_CM } from '../../utils/linking';
+import { nextRoomName } from '../../utils/programme';
 import { v4 as uuidv4 } from 'uuid';
 import type { ObjectType, Point } from '../../types';
 
@@ -54,6 +55,7 @@ export function FloorCanvas() {
     rulerStart,
   } = useToolStore();
   const { addRoom, addObject, rooms } = useProjectStore();
+  const { t } = useSettingsStore();
   const { clearSelection, selectMultiple } = useSelectionStore();
 
   // Handle resize
@@ -128,14 +130,14 @@ export function FloorCanvas() {
       }));
 
       addRoom({
-        name: `Room`,
+        name: nextRoomName(rooms, t('defaultRoomName')),
         corners,
         walls,
         fillColor: '#f3f4f6',
         isComplete: true,
       });
     },
-    [addRoom]
+    [addRoom, rooms, t]
   );
 
   // Handle canvas click
@@ -180,7 +182,7 @@ export function FloorCanvas() {
             }));
 
             addRoom({
-              name: `Room`,
+              name: nextRoomName(rooms, t('defaultRoomName')),
               corners,
               walls,
               fillColor: '#f3f4f6',
@@ -222,6 +224,7 @@ export function FloorCanvas() {
       clearSelection,
       rooms,
       setSnapHighlightPoint,
+      t,
     ]
   );
 
@@ -450,6 +453,8 @@ export function FloorCanvas() {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Esc inside a panel field belongs to that field (e.g. restoring its value), not the canvas.
+      if ((e.target as HTMLElement | null)?.closest?.('input, textarea, select')) return;
       // Escape to cancel drawing
       if (e.key === 'Escape') {
         if (isDrawing) {

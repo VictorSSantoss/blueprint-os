@@ -19,6 +19,8 @@ export interface Room {
   walls: Wall[];
   fillColor: string;
   isComplete: boolean;
+  /** Desired area in square centimetres (FDD-0003); absent when no target is set. */
+  targetAreaCm2?: number;
 }
 
 export interface RoomMetrics {

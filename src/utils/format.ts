@@ -47,3 +47,21 @@ export function formatArea(cm2: number): string {
 export function formatLength(cm: number): string {
   return `${LENGTH_FORMATTER.format(cm / 100)} m`;
 }
+
+const INPUT_AREA_FORMATTER = new Intl.NumberFormat('pt-BR', {
+  maximumFractionDigits: 2,
+  useGrouping: false,
+});
+
+/**
+ * Formats an area as an editable pt-BR number in m², without unit or forced decimals.
+ *
+ * @param cm2 - Area in square centimetres.
+ * @returns Text for an input field, e.g. `"14,5"`.
+ * @example
+ * formatAreaForInput(145000) // → "14,5"
+ * formatAreaForInput(140000) // → "14"
+ */
+export function formatAreaForInput(cm2: number): string {
+  return INPUT_AREA_FORMATTER.format(cm2 / 10000);
+}

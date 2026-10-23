@@ -1,29 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { v4 as uuidv4 } from 'uuid';
 import type { Room } from '../types';
 import { useProjectStore } from './projectStore';
-
-function makeRectRoom(x: number, y: number, w: number, h: number): Room {
-  const corners = [
-    { id: uuidv4(), position: { x, y } },
-    { id: uuidv4(), position: { x: x + w, y } },
-    { id: uuidv4(), position: { x: x + w, y: y + h } },
-    { id: uuidv4(), position: { x, y: y + h } },
-  ];
-  return {
-    id: uuidv4(),
-    name: 'Room',
-    corners,
-    walls: corners.map((c, i) => ({
-      id: uuidv4(),
-      startCornerId: c.id,
-      endCornerId: corners[(i + 1) % corners.length].id,
-      thickness: 15,
-    })),
-    fillColor: '#f3f4f6',
-    isComplete: true,
-  };
-}
+import { makeRectRoom } from '../test/factories';
 
 function cornerPos(roomId: string, cornerId: string) {
   const room = useProjectStore.getState().rooms.find((r) => r.id === roomId)!;

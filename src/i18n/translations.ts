@@ -94,6 +94,20 @@ export const translations = {
     loadError: 'Failed to load project file',
     pdfExportSuccess: 'PDF exported successfully',
     pdfExportError: 'Failed to export PDF',
+
+    // Room programme (FDD-0003)
+    targetArea: 'Target area (m²)',
+    actualArea: 'Current area',
+    areaShort: 'short by',
+    areaOver: 'over by',
+    roomProgramme: 'Room programme',
+    targetShort: 'Target',
+    actualShort: 'Current',
+    total: 'Total',
+    invalidArea: 'Enter an area in m², e.g. 14 or 14.5',
+    defaultRoomName: 'Room',
+    roomsWithTarget: '{count} of {total} rooms have a target',
+    areaMeasurementNote: 'Areas are measured to wall centrelines. Real usable area will be slightly smaller.',
     objectPlacementHint: 'Click or drag objects to place on canvas',
     noRoomsHint: 'Click "Draw Room" in the toolbar and click on the canvas to start drawing walls.',
 
@@ -285,6 +299,20 @@ export const translations = {
     loadError: 'Falha ao carregar o arquivo do projeto',
     pdfExportSuccess: 'PDF exportado com sucesso',
     pdfExportError: 'Falha ao exportar PDF',
+
+    // Room programme (FDD-0003)
+    targetArea: 'Área desejada (m²)',
+    actualArea: 'Área atual',
+    areaShort: 'faltam',
+    areaOver: 'sobram',
+    roomProgramme: 'Programa de necessidades',
+    targetShort: 'Meta',
+    actualShort: 'Atual',
+    total: 'Total',
+    invalidArea: 'Digite uma área em m², por exemplo 14 ou 14,5',
+    defaultRoomName: 'Cômodo',
+    roomsWithTarget: '{count} de {total} cômodos com meta',
+    areaMeasurementNote: 'Áreas medidas pelo eixo das paredes. A área útil real será um pouco menor.',
     objectPlacementHint: 'Clique ou arraste objetos para posicioná-los na planta',
     noRoomsHint: 'Clique em "Desenhar cômodo" na barra de ferramentas e clique na planta para começar a desenhar paredes.',
 

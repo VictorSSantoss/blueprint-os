@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatArea, formatLength } from './format';
+import { formatArea, formatLength, formatAreaForInput } from './format';
 
 describe('formatArea', () => {
   it('[FDD-0001 / AC-02] formats a 4×3 m room correctly', () => {
@@ -55,5 +55,13 @@ describe('formatLength', () => {
     const result = formatLength(345);
 
     expect(result).toBe('3,45 m');
+  });
+});
+
+describe('formatAreaForInput', () => {
+  it('[FDD-0003] round-trips a target into the input as pt-BR without a unit', () => {
+    expect(formatAreaForInput(145000)).toBe('14,5');
+    expect(formatAreaForInput(140000)).toBe('14');
+    expect(formatAreaForInput(12345678)).toBe('1234,57');
   });
 });

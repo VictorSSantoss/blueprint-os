@@ -1,11 +1,92 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useSelectionStore, useProjectStore, useCanvasStore, useSettingsStore } from '../../../stores';
 import { OBJECT_CATALOG } from '../../../constants';
 import { polygonArea, polygonPerimeter } from '../../../utils/geometry';
-import { formatArea, formatLength } from '../../../utils/format';
+import { formatArea, formatLength, formatAreaForInput } from '../../../utils/format';
+import { parseAreaInput, compareToTarget } from '../../../utils/programme';
 import { Trash2Icon, RotateCwIcon, CopyIcon } from 'lucide-react';
 import type { FloorObject, Room } from '../../../types';
 import { getLocalizedObjectName } from '../../../utils/objectNames';
+
+function TargetAreaField({ room, areaCm2 }: { room: Room; areaCm2: number }) {
+  const { updateRoom } = useProjectStore();
+  const { t } = useSettingsStore();
+  const [draft, setDraft] = useState<string | null>(null);
+  const [invalid, setInvalid] = useState(false);
+
+  const shown = draft ?? (room.targetAreaCm2 ? formatAreaForInput(room.targetAreaCm2) : '');
+
+  const commit = () => {
+    if (draft === null) return;
+    if (draft.trim() === '') {
+      updateRoom(room.id, { targetAreaCm2: undefined });
+    } else {
+      const cm2 = parseAreaInput(draft);
+      if (cm2 === null) {
+        setInvalid(true);
+        return;
+      }
+      updateRoom(room.id, { targetAreaCm2: cm2 });
+    }
+    setDraft(null);
+    setInvalid(false);
+  };
+
+  const cancel = () => {
+    setDraft(null);
+    setInvalid(false);
+  };
+
+  const comparison = room.targetAreaCm2 && room.isComplete
+    ? compareToTarget(areaCm2, room.targetAreaCm2)
+    : null;
+
+  return (
+    <div>
+      <label htmlFor={`target-${room.id}`} className="block text-xs font-medium text-ink-secondary uppercase mb-2">
+        {t('targetArea')}
+      </label>
+      <input
+        id={`target-${room.id}`}
+        type="text"
+        inputMode="decimal"
+        value={shown}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') cancel();
+        }}
+        aria-invalid={invalid}
+        title={invalid ? t('invalidArea') : undefined}
+        placeholder="14,5"
+        className={`w-full px-2 py-1.5 text-sm border rounded focus:outline-none focus:ring-1 ${
+          invalid ? 'border-ember focus:ring-ember' : 'border-line focus:ring-teal'
+        }`}
+      />
+      {invalid && <p className="mt-1 text-xs text-ember">{t('invalidArea')}</p>}
+      {comparison && room.targetAreaCm2 && (
+        <div className="mt-2 space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="text-ink-secondary">{t('targetShort')}</span>
+            <span className="font-medium">{formatArea(room.targetAreaCm2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-ink-secondary">{t('actualArea')}</span>
+            <span className="font-medium">{formatArea(areaCm2)}</span>
+          </div>
+          <p
+            className={`px-2 py-1 rounded text-right font-medium ${
+              comparison.withinTolerance ? 'bg-teal-wash text-teal-deep' : 'bg-amber-wash text-amber'
+            }`}
+          >
+            {comparison.diffCm2 < 0 ? t('areaShort') : t('areaOver')} {formatArea(Math.abs(comparison.diffCm2))}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function RoomProperties({ room }: { room: Room }) {
   const { updateRoom, deleteRoom } = useProjectStore();
@@ -69,6 +150,8 @@ function RoomProperties({ room }: { room: Room }) {
           </div>
         </div>
       )}
+
+      <TargetAreaField key={room.id} room={room} areaCm2={areaCm2} />
 
       {/* Room Color */}
       <div>
@@ -307,6 +390,76 @@ function ObjectProperties({ object }: { object: FloorObject }) {
   );
 }
 
+function ProgrammeTable() {
+  const { rooms } = useProjectStore();
+  const { t } = useSettingsStore();
+
+  const { rows, targetTotalCm2, actualTotalCm2, withTarget } = useMemo(() => {
+    const rows = rooms
+      .filter((r) => r.isComplete)
+      .map((r) => {
+        const actualCm2 = polygonArea(r.corners.map((c) => c.position));
+        return {
+          id: r.id,
+          name: r.name || t('room'),
+          actualCm2,
+          targetCm2: r.targetAreaCm2,
+          withinTolerance: r.targetAreaCm2 ? compareToTarget(actualCm2, r.targetAreaCm2).withinTolerance : null,
+        };
+      });
+    const withTarget = rows.filter((r) => r.targetCm2);
+    return {
+      rows,
+      withTarget: withTarget.length,
+      targetTotalCm2: withTarget.reduce((sum, r) => sum + (r.targetCm2 ?? 0), 0),
+      actualTotalCm2: rows.reduce((sum, r) => sum + r.actualCm2, 0),
+    };
+  }, [rooms, t]);
+
+  return (
+    <div>
+      <h4 className="text-xs font-medium text-ink-secondary uppercase mb-2">{t('roomProgramme')}</h4>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-xs text-ink-faint">
+            <th className="text-left font-normal pb-1">{t('room')}</th>
+            <th className="text-right font-normal pb-1">{t('targetShort')}</th>
+            <th className="text-right font-normal pb-1">{t('actualShort')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.id} className="border-t border-line-faint">
+              <td className="py-1 pr-2 truncate max-w-[8rem]" title={r.name}>{r.name}</td>
+              <td className="py-1 text-right text-ink-secondary">{r.targetCm2 ? formatArea(r.targetCm2) : '—'}</td>
+              <td
+                className={`py-1 text-right font-medium ${
+                  r.withinTolerance === null ? '' : r.withinTolerance ? 'text-teal-deep' : 'text-amber'
+                }`}
+              >
+                {formatArea(r.actualCm2)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="border-t border-line font-semibold">
+            <td className="pt-1">{t('total')}</td>
+            <td className="pt-1 text-right">{withTarget > 0 ? formatArea(targetTotalCm2) : '—'}</td>
+            <td className="pt-1 text-right">{formatArea(actualTotalCm2)}</td>
+          </tr>
+        </tfoot>
+      </table>
+      {withTarget > 0 && withTarget < rows.length && (
+        <p className="mt-1 text-xs text-ink-secondary">
+          {t('roomsWithTarget').replace('{count}', String(withTarget)).replace('{total}', String(rows.length))}
+        </p>
+      )}
+      <p className="mt-2 text-xs text-ink-faint">{t('areaMeasurementNote')}</p>
+    </div>
+  );
+}
+
 function RoomStatistics() {
   const { rooms, objects } = useProjectStore();
   const { t } = useSettingsStore();
@@ -349,6 +502,8 @@ function RoomStatistics() {
           <span className="font-medium">{objects.length}</span>
         </div>
       </div>
+
+      {completedRoomCount > 0 && <ProgrammeTable />}
 
       {rooms.length === 0 && (
         <div className="mt-4 p-3 bg-hover rounded-lg text-sm text-ink-secondary">
