@@ -56,19 +56,17 @@ export function Toolbar() {
           mode="draw-room"
           icon={<PentagonIcon className="w-4 h-4" />}
           label={t('drawPolygon')}
-          shortcut="P"
+          shortcut="R"
         />
         <ToolButton
           mode="draw-rectangle"
           icon={<SquareIcon className="w-4 h-4" />}
           label={t('drawRectangle')}
-          shortcut="E"
         />
         <ToolButton
           mode="ruler"
           icon={<RulerIcon className="w-4 h-4" />}
           label={t('ruler')}
-          shortcut="M"
         />
         <ToolButton
           mode="pan"
