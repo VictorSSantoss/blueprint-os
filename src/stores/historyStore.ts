@@ -1,26 +1,36 @@
 import { create } from 'zustand';
-import type { Room, FloorObject, DimensionLine } from '../types';
+import type { Room, FloorObject, DimensionLine, Lot } from '../types';
 
-interface ProjectSnapshot {
-  timestamp: number;
+/** The undoable part of a project: the plan, not the view (FDD-0006). */
+export interface PlanSnapshot {
   rooms: Room[];
   objects: FloorObject[];
   dimensionLines: DimensionLine[];
+  lot?: Lot;
 }
 
 interface HistoryState {
-  past: ProjectSnapshot[];
-  future: ProjectSnapshot[];
-  maxHistory: number;
-
-  // Computed
+  past: PlanSnapshot[];
+  future: PlanSnapshot[];
   canUndo: boolean;
   canRedo: boolean;
 
-  // Actions
-  pushState: (snapshot: Omit<ProjectSnapshot, 'timestamp'>) => void;
-  undo: () => ProjectSnapshot | null;
-  redo: () => ProjectSnapshot | null;
+  /** Records the plan as it was before a change, and clears the redo stack. */
+  record: (before: PlanSnapshot) => void;
+  /**
+   * Steps back one change.
+   *
+   * @param current - The plan as it is now; it becomes the next redo step.
+   * @returns The plan to restore, or null when there is nothing to undo.
+   */
+  undo: (current: PlanSnapshot) => PlanSnapshot | null;
+  /**
+   * Steps forward one undone change.
+   *
+   * @param current - The plan as it is now; it becomes the next undo step.
+   * @returns The plan to restore, or null when there is nothing to redo.
+   */
+  redo: (current: PlanSnapshot) => PlanSnapshot | null;
   clearHistory: () => void;
 }
 
@@ -29,65 +39,32 @@ const MAX_HISTORY = 50;
 export const useHistoryStore = create<HistoryState>((set, get) => ({
   past: [],
   future: [],
-  maxHistory: MAX_HISTORY,
   canUndo: false,
   canRedo: false,
 
-  pushState: (snapshot) => {
-    set((state) => {
-      const newSnapshot: ProjectSnapshot = {
-        ...snapshot,
-        timestamp: Date.now(),
-      };
-      const newPast = [...state.past, newSnapshot].slice(-MAX_HISTORY);
-      return {
-        past: newPast,
-        future: [], // Clear redo stack on new action
-        canUndo: newPast.length > 0,
-        canRedo: false,
-      };
-    });
+  record: (before) => {
+    const past = [...get().past, before].slice(-MAX_HISTORY);
+    set({ past, future: [], canUndo: true, canRedo: false });
   },
 
-  undo: () => {
-    const { past } = get();
+  undo: (current) => {
+    const { past, future } = get();
     if (past.length === 0) return null;
-
     const previous = past[past.length - 1];
     const newPast = past.slice(0, -1);
-
-    set({
-      past: newPast,
-      canUndo: newPast.length > 0,
-      canRedo: true,
-    });
-
-    // The current state will be pushed to future by the caller
+    set({ past: newPast, future: [current, ...future], canUndo: newPast.length > 0, canRedo: true });
     return previous;
   },
 
-  redo: () => {
-    const { future } = get();
+  redo: (current) => {
+    const { past, future } = get();
     if (future.length === 0) return null;
-
-    const next = future[0];
-    const newFuture = future.slice(1);
-
-    set({
-      future: newFuture,
-      canRedo: newFuture.length > 0,
-      canUndo: true,
-    });
-
+    const [next, ...newFuture] = future;
+    set({ past: [...past, current], future: newFuture, canUndo: true, canRedo: newFuture.length > 0 });
     return next;
   },
 
   clearHistory: () => {
-    set({
-      past: [],
-      future: [],
-      canUndo: false,
-      canRedo: false,
-    });
+    set({ past: [], future: [], canUndo: false, canRedo: false });
   },
 }));

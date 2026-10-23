@@ -8,6 +8,7 @@ import { CanvasErrorFallback } from './components/canvas/CanvasErrorFallback';
 import { ToastContainer } from './components/Toast';
 import { useKeyboardShortcuts, type KeyboardShortcut, type KeyboardShortcutOnKeyUp } from './hooks';
 import { useToolStore, useSelectionStore, useProjectStore, useCanvasStore } from './stores';
+import { undo, redo } from './stores/history';
 
 function App() {
   const { setMode, mode } = useToolStore();
@@ -20,7 +21,12 @@ function App() {
       // Tool shortcuts
       { key: 'v', action: () => setMode('select') },
       { key: 'r', action: () => setMode('draw-room') },
-      { key: ' ', action: () => mode !== 'pan' && setMode('pan'), preventDefault: true },
+      { key: ' ', action: () => mode !== 'pan' && setMode('pan') },
+
+      // Undo / redo (FDD-0006); Ctrl also matches ⌘ on Mac
+      { key: 'z', modifiers: { ctrl: true }, action: undo },
+      { key: 'z', modifiers: { ctrl: true, shift: true }, action: redo },
+      { key: 'y', modifiers: { ctrl: true }, action: redo },
 
       // Zoom shortcuts
       { key: '+', action: zoomIn },

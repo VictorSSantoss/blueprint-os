@@ -71,7 +71,7 @@ The father will sketch a house with 6–10 rooms. Every time he adjusts one room
 2. They drag a corner handle on the shared wall. Both rooms resize together — no gap, no overlap.
 3. They drag the wall segment itself (the line between two corners). Both endpoints move by the same delta; both rooms resize.
 
-**Undo:** each move is one store update, so a single undo step will revert all affected rooms once undo exists. Undo is not wired up in the app today (see 9.2).
+**Undo:** each move is one store update, so a single Ctrl+Z reverts all affected rooms (implemented in FDD-0006).
 
 ### 4.2 Interaction states
 
@@ -319,3 +319,4 @@ Factory helper available: `makeRectRoom(x, y, w, h)` for concise test setup.
   4. **`isValidRoom` rejects zero-length walls.** INV-01 requires it; area and self-intersection checks alone accepted a triangle with a duplicated vertex.
   5. **Wall drags snap to the grid** (not specified in this FDD), matching corner drags so walls do not drift off-grid.
   6. **Undo/redo is not wired up (pre-existing).** `historyStore.pushState` is never called and the Header's undo/redo buttons have no handlers, so the "single Ctrl+Z" expectation in 4.1 cannot be verified. Out of scope here; needs its own FDD.
+- 2026-10-23: Item 6 resolved by FDD-0006: undo/redo now exists and a linked move undoes in one step (FDD-0006 AC-03).

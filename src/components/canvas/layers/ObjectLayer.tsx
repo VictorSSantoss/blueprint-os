@@ -32,6 +32,7 @@ interface ObjectShapeProps {
   onSelect: (id: string, additive: boolean) => void;
   onHover: (id: string | null) => void;
   onResize: (id: string, newWidth: number, newDepth: number, newX: number, newY: number, height: number) => void;
+  onMove: (id: string, position: { x: number; y: number }) => void;
 }
 
 function getFillColor(type: ObjectType): string {
@@ -227,6 +228,7 @@ const ObjectShape = memo(
     onSelect,
     onHover,
     onResize,
+    onMove,
   }: ObjectShapeProps) {
     const { position, dimensions, rotation, type, id } = object;
     const [resizing, setResizing] = useState<ResizeHandle | null>(null);
@@ -386,6 +388,13 @@ const ObjectShape = memo(
         onMouseEnter={() => onHover(object.id)}
         onMouseLeave={() => onHover(null)}
         draggable={isSelected && !resizing}
+        onDragEnd={(e) => {
+          if (e.target !== e.currentTarget) return;
+          onMove(id, {
+            x: Math.round(e.target.x() / PIXELS_PER_CM),
+            y: Math.round(e.target.y() / PIXELS_PER_CM),
+          });
+        }}
       >
         {/* Base shape */}
         {renderObjectShape(type, width, height, fillColor, strokeColor, strokeWidth)}
@@ -488,6 +497,10 @@ export function ObjectLayer() {
     });
   }, [updateObject]);
 
+  const handleMove = useCallback((id: string, position: { x: number; y: number }) => {
+    updateObject(id, { position });
+  }, [updateObject]);
+
   return (
     <Group>
       {objects.map((object) => (
@@ -502,6 +515,7 @@ export function ObjectLayer() {
           onSelect={select}
           onHover={setHoveredId}
           onResize={handleResize}
+          onMove={handleMove}
         />
       ))}
     </Group>

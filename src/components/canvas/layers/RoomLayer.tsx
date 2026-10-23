@@ -209,7 +209,7 @@ function RoomShape({ room, allRooms, isSelected, isHovered, isOutsideSetback, zo
 
       {/* Room name and Area label */}
       {isComplete && (
-        <Group x={centroid.x} y={centroid.y}>
+        <Group x={centroid.x} y={centroid.y} listening={false}>
           {name && (
             <Text
               text={name}

@@ -14,6 +14,7 @@ import {
 import logoSvg from '../../assets/logo.svg';
 import { useCanvasStore, useProjectStore, useHistoryStore, useSettingsStore, useCanvasRefStore } from '../../stores';
 import { exportToPdf } from '../../utils/exportPdf';
+import { undo, redo } from '../../stores/history';
 import { parseSavedLot } from '../../utils/lot';
 import { useToast } from '../Toast';
 
@@ -182,6 +183,7 @@ export function Header() {
       {/* Edit actions */}
       <div className="flex items-center gap-1">
         <button
+          onClick={undo}
           disabled={!canUndo}
           className="p-2 hover:bg-header-hover rounded disabled:opacity-30 disabled:cursor-not-allowed"
           title={`${t('undo')} (Ctrl+Z)`}
@@ -189,6 +191,7 @@ export function Header() {
           <Undo2Icon className="w-4 h-4" />
         </button>
         <button
+          onClick={redo}
           disabled={!canRedo}
           className="p-2 hover:bg-header-hover rounded disabled:opacity-30 disabled:cursor-not-allowed"
           title={`${t('redo')} (Ctrl+Shift+Z)`}
