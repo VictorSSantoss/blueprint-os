@@ -16,7 +16,29 @@ interface ProjectState {
   addRoom: (room: Omit<Room, 'id'>) => string;
   updateRoom: (id: string, updates: Partial<Room>) => void;
   deleteRoom: (id: string) => void;
+  /**
+   * Moves one corner, and every corner of any room sitting at the same position, to `newPosition`.
+   *
+   * @remarks
+   * Linked corners (ADR-0002) move in a single store update so a shared wall never opens.
+   * The whole move is rejected, leaving the store untouched, if any affected room would end up
+   * with zero area, a zero-length wall or crossing edges (FDD-0002 INV-01, INV-02).
+   *
+   * @param roomId - Room that owns the dragged corner.
+   * @param cornerId - Corner being dragged.
+   * @param newPosition - Target position in whole centimetres.
+   */
   moveCorner: (roomId: string, cornerId: string, newPosition: Point) => void;
+  /**
+   * Translates both endpoints of a wall, and every corner linked to them, by `delta`.
+   *
+   * @remarks
+   * Same all-or-nothing validity rule and single store update as `moveCorner`.
+   *
+   * @param roomId - Room that owns the wall.
+   * @param wallId - Wall being dragged.
+   * @param delta - Translation in whole centimetres.
+   */
   moveWall: (roomId: string, wallId: string, delta: { dx: number; dy: number }) => void;
 
   // Object actions
