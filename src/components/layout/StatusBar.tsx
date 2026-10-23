@@ -1,5 +1,6 @@
 import { useCanvasStore, useProjectStore, useSelectionStore, useSettingsStore } from '../../stores';
 import { polygonArea } from '../../utils/geometry';
+import { formatArea } from '../../utils/format';
 import type { GridSize } from '../../types';
 
 export function StatusBar() {
@@ -8,11 +9,9 @@ export function StatusBar() {
   const { selectedIds } = useSelectionStore();
   const { t } = useSettingsStore();
 
-  // Calculate total area
-  const totalArea = rooms.reduce((sum, room) => {
+  const totalAreaCm2 = rooms.reduce((sum, room) => {
     if (!room.isComplete) return sum;
-    const areaCm2 = polygonArea(room.corners.map((c) => c.position));
-    return sum + areaCm2 / 10000; // Convert to m²
+    return sum + polygonArea(room.corners.map((c) => c.position));
   }, 0);
 
   return (
@@ -40,7 +39,7 @@ export function StatusBar() {
       {/* Room area */}
       <div className="flex items-center gap-2">
         <span className="text-ink-faint">{t('totalArea')}:</span>
-        <span className="font-medium">{totalArea.toFixed(2)} m²</span>
+        <span className="font-medium">{formatArea(totalAreaCm2)}</span>
       </div>
 
       {/* Object count */}

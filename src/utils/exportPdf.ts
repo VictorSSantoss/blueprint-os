@@ -36,7 +36,7 @@ export async function exportToPdf(
   // Date on the right
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
-  const date = new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
+  const date = new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'pt-BR', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -80,16 +80,16 @@ export async function exportToPdf(
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(80);
 
-  const statsText = language === 'tr'
-    ? `${completedRooms.length} Oda  •  ${totalArea.toFixed(1)} m²  •  ${objects.length} Nesne`
-    : `${completedRooms.length} Rooms  •  ${totalArea.toFixed(1)} m²  •  ${objects.length} Objects`;
+  const statsText = language === 'en'
+    ? `${completedRooms.length} Rooms  •  ${totalArea.toFixed(1)} m²  •  ${objects.length} Objects`
+    : `${completedRooms.length} Cômodos  •  ${totalArea.toFixed(1)} m²  •  ${objects.length} Objetos`;
 
   pdf.text(statsText, margin, footerY - 5);
 
   // Branding on the right
   pdf.setFontSize(8);
   pdf.setTextColor(150);
-  pdf.text('Floor Maker', pageWidth - margin, footerY - 5, { align: 'right' });
+  pdf.text('BlueprintOS', pageWidth - margin, footerY - 5, { align: 'right' });
 
   // Save the PDF
   const filename = `${projectName || 'floor-plan'}-${new Date().toISOString().split('T')[0]}.pdf`;

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useSelectionStore, useProjectStore, useCanvasStore, useSettingsStore } from '../../../stores';
 import { OBJECT_CATALOG } from '../../../constants';
 import { polygonArea, polygonPerimeter } from '../../../utils/geometry';
+import { formatArea, formatLength } from '../../../utils/format';
 import { Trash2Icon, RotateCwIcon, CopyIcon } from 'lucide-react';
 import type { FloorObject, Room } from '../../../types';
 import { getLocalizedObjectName } from '../../../utils/objectNames';
@@ -12,9 +13,7 @@ function RoomProperties({ room }: { room: Room }) {
   const { t } = useSettingsStore();
 
   const areaCm2 = room.isComplete ? polygonArea(room.corners.map((c) => c.position)) : 0;
-  const areaM2 = areaCm2 / 10000;
   const perimeterCm = room.isComplete ? polygonPerimeter(room.corners.map((c) => c.position)) : 0;
-  const perimeterM = perimeterCm / 100;
 
   const handleNameChange = (value: string) => {
     updateRoom(room.id, { name: value || undefined });
@@ -61,11 +60,11 @@ function RoomProperties({ room }: { room: Room }) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-ink-secondary">{t('totalArea')}</span>
-              <span className="font-medium">{areaM2.toFixed(2)} m²</span>
+              <span className="font-medium">{formatArea(areaCm2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-ink-secondary">{t('totalPerimeter')}</span>
-              <span className="font-medium">{perimeterM.toFixed(2)} m</span>
+              <span className="font-medium">{formatLength(perimeterCm)}</span>
             </div>
           </div>
         </div>
@@ -312,7 +311,7 @@ function RoomStatistics() {
   const { rooms, objects } = useProjectStore();
   const { t } = useSettingsStore();
 
-  const { totalArea, totalPerimeter, completedRoomCount } = useMemo(() => {
+  const { totalAreaCm2, totalPerimeterCm, completedRoomCount } = useMemo(() => {
     let area = 0;
     let perimeter = 0;
     let completed = 0;
@@ -321,11 +320,11 @@ function RoomStatistics() {
       if (!room.isComplete) continue;
       completed++;
       const corners = room.corners.map((c) => c.position);
-      area += polygonArea(corners) / 10000;
-      perimeter += polygonPerimeter(corners) / 100;
+      area += polygonArea(corners);
+      perimeter += polygonPerimeter(corners);
     }
 
-    return { totalArea: area, totalPerimeter: perimeter, completedRoomCount: completed };
+    return { totalAreaCm2: area, totalPerimeterCm: perimeter, completedRoomCount: completed };
   }, [rooms]);
 
   return (
@@ -339,11 +338,11 @@ function RoomStatistics() {
         </div>
         <div className="flex justify-between">
           <span className="text-ink-secondary">{t('totalArea')}</span>
-          <span className="font-medium">{totalArea.toFixed(2)} m²</span>
+          <span className="font-medium">{formatArea(totalAreaCm2)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-ink-secondary">{t('totalPerimeter')}</span>
-          <span className="font-medium">{totalPerimeter.toFixed(2)} m</span>
+          <span className="font-medium">{formatLength(totalPerimeterCm)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-ink-secondary">{t('objectsPlaced')}</span>

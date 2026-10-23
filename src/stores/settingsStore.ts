@@ -9,36 +9,10 @@ interface SettingsState {
   t: (key: TranslationKey) => string;
 }
 
-// Detect browser language from multiple sources
 const detectLanguage = (): Language => {
-  // Check multiple browser language sources
-  const languages: string[] = [];
-
-  // Primary language
-  if (navigator.language) {
-    languages.push(navigator.language.toLowerCase());
-  }
-
-  // All preferred languages (ordered by preference)
-  if (navigator.languages && navigator.languages.length > 0) {
-    languages.push(...navigator.languages.map(l => l.toLowerCase()));
-  }
-
-  // Check URL parameter for language override (useful for testing)
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlLang = urlParams.get('lang');
-  if (urlLang) {
-    languages.unshift(urlLang.toLowerCase());
-  }
-
-  // Check for Turkish language codes
-  for (const lang of languages) {
-    if (lang.startsWith('tr') || lang === 'tr-tr' || lang === 'tr-cy') {
-      return 'tr';
-    }
-  }
-
-  return 'en';
+  const urlLang = new URLSearchParams(window.location.search).get('lang');
+  if (urlLang === 'en') return 'en';
+  return 'pt-BR';
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -56,7 +30,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
     }),
     {
-      name: 'floor-maker-settings',
+      name: 'blueprint-os-settings',
       partialize: (state) => ({ language: state.language }),
     }
   )

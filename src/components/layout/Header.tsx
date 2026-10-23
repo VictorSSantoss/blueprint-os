@@ -10,7 +10,6 @@ import {
   RulerIcon,
   TagIcon,
   HelpCircleIcon,
-  LanguagesIcon,
 } from 'lucide-react';
 import logoSvg from '../../assets/logo.svg';
 import { useCanvasStore, useProjectStore, useHistoryStore, useSettingsStore, useCanvasRefStore } from '../../stores';
@@ -21,16 +20,12 @@ export function Header() {
   const { name, setProjectName, clearProject, rooms, objects } = useProjectStore();
   const { showGrid, showDimensions, showObjectLabels, toggleGrid, toggleDimensions, toggleObjectLabels, setExporting } = useCanvasStore();
   const { canUndo, canRedo } = useHistoryStore();
-  const { language, setLanguage, t } = useSettingsStore();
+  const { language, t } = useSettingsStore();
   const stageRef = useCanvasRefStore((state) => state.stageRef);
   const toast = useToast();
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(name);
   const [isExporting, setIsExporting] = useState(false);
-
-  const toggleLanguage = () => {
-    setLanguage(language === 'en' ? 'tr' : 'en');
-  };
 
   const handleSaveName = () => {
     setProjectName(editedName);
@@ -103,10 +98,10 @@ export function Header() {
         objects,
         language,
       });
-      toast.success(language === 'tr' ? 'PDF başarıyla dışa aktarıldı' : 'PDF exported successfully');
+      toast.success(t('pdfExportSuccess'));
     } catch (error) {
       console.error('Export failed:', error);
-      toast.error(language === 'tr' ? 'PDF dışa aktarma başarısız' : 'Failed to export PDF');
+      toast.error(t('pdfExportError'));
     } finally {
       setExporting(false);
       setIsExporting(false);
@@ -117,8 +112,8 @@ export function Header() {
     <header className="h-12 bg-header text-ink-inverse flex items-center px-4 gap-4 border-b border-line-header">
       {/* Logo */}
       <div className="font-bold text-lg flex items-center gap-2 tracking-tight">
-        <img src={logoSvg} alt="Floor Maker" className="w-6 h-6" />
-        <span>Floor Maker</span>
+        <img src={logoSvg} alt="BlueprintOS" className="w-6 h-6" />
+        <span>{t('appName')}</span>
       </div>
 
       {/* Project name */}
@@ -225,18 +220,6 @@ export function Header() {
           <TagIcon className="w-4 h-4" />
         </button>
       </div>
-
-      <div className="w-px h-6 bg-line-header" />
-
-      {/* Language */}
-      <button
-        onClick={toggleLanguage}
-        className="p-2 hover:bg-header-hover rounded flex items-center gap-1"
-        title={t('language')}
-      >
-        <LanguagesIcon className="w-4 h-4" />
-        <span className="text-xs uppercase">{language}</span>
-      </button>
 
       {/* Help */}
       <button className="p-2 hover:bg-header-hover rounded" title={t('help')}>
