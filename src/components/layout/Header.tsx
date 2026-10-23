@@ -15,7 +15,8 @@ import logoSvg from '../../assets/logo.svg';
 import { useCanvasStore, useProjectStore, useHistoryStore, useSettingsStore, useCanvasRefStore } from '../../stores';
 import { exportToPdf } from '../../utils/exportPdf';
 import { undo, redo } from '../../stores/history';
-import { parseSavedLot } from '../../utils/lot';
+import { parseProjectFile, serializeProject } from '../../utils/projectFile';
+import { currentPlan, optionsForSave, replaceAllTabs } from '../../stores/tabs';
 import { useToast } from '../Toast';
 
 export function Header() {
@@ -37,19 +38,14 @@ export function Header() {
   const handleNewProject = () => {
     if (confirm(t('confirmNewProject'))) {
       clearProject();
+      replaceAllTabs([{ name: `${t('defaultOptionName')} 1`, plan: currentPlan() }], 0);
     }
   };
 
   const handleSaveProject = () => {
     const state = useProjectStore.getState();
-    const data = {
-      version: '1.0',
-      name: state.name,
-      rooms: state.rooms,
-      objects: state.objects,
-      dimensionLines: state.dimensionLines,
-      lot: state.lot,
-    };
+    const { options, activeOption } = optionsForSave();
+    const data = serializeProject(state.name, options, activeOption);
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -69,17 +65,12 @@ export function Header() {
 
       try {
         const text = await file.text();
-        const data = JSON.parse(text);
-        useProjectStore.getState().loadProject({
-          rooms: data.rooms || [],
-          objects: data.objects || [],
-          dimensionLines: data.dimensionLines || [],
-          lot: parseSavedLot(data.lot),
-        });
-        if (data.name) {
-          setProjectName(data.name);
+        const { name, options, activeOption } = parseProjectFile(JSON.parse(text), t('defaultOptionName'));
+        replaceAllTabs(options, activeOption);
+        if (name) {
+          setProjectName(name);
         }
-      } catch (err) {
+      } catch {
         toast.error(t('loadError'));
       }
     };

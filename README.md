@@ -31,10 +31,11 @@ npm run dev     # http://localhost:5173
 - **Brazilian Portuguese and metres:** `3,45 m` and `12,60 m²` everywhere; coordinates are stored as whole centimetres.
 - **Object library:** doors, windows, furniture, appliances and bathroom fixtures, placed by click or drag.
 - **Ruler and dimension labels.**
-- **Save and load** projects as JSON; the current project also autosaves in the browser.
+- **Save and load** projects as JSON (every option in one file); the current project also autosaves in the browser.
 - **Room programme:** target area per room, compared with the drawn area, and a *Programa de necessidades* table.
 - **Lot and setbacks:** lot outline with setback lines, a warning for rooms that cross them, and the *taxa de ocupação*.
 - **Undo and redo** for every change to the plan.
+- **Plan options in tabs:** *Opção 1*, *Opção 2*, … each hold an alternative plan; duplicate an option to try a variant. All options are saved in the project file.
 - **PDF export.**
 
 Keyboard shortcuts: `V` select, `R` draw polygon room, hold `Space` to pan, `+` / `-` zoom, `0` reset view, `Delete` remove selection, `Ctrl+D` duplicate, `Ctrl+R` rotate, `Ctrl+Z` undo, `Ctrl+Shift+Z` or `Ctrl+Y` redo (`⌘` instead of `Ctrl` on Mac).
@@ -66,6 +67,7 @@ Feature design documents:
 - [FDD-0003: Room programme](docs/designs/0003-room-programme.md)
 - [FDD-0004: Lot and setbacks](docs/designs/0004-lot-and-setbacks.md)
 - [FDD-0006: Undo and redo](docs/designs/0006-undo-redo.md)
+- [FDD-0007: Plan options in tabs](docs/designs/0007-plan-options-in-tabs.md)
 
 Architecture decisions:
 

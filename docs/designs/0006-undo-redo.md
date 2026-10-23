@@ -66,7 +66,7 @@ A wrong drag, an accidental *Excluir* or a bad lot value cannot be reverted. For
 3. He types *Quarto do casal* in the room name, then presses Ctrl+Z outside the field. The whole name change is undone in one step.
 4. He drags a shared wall (FDD-0002). One Ctrl+Z puts both rooms back.
 5. After undoing, he makes a new change; ↷ becomes disabled.
-6. Opening a project or starting a new one is also one step and can be undone.
+6. Opening a project or starting a new one clears the history (changed by FDD-0007, which made these actions replace every plan option).
 
 ### 4.2 Interaction states
 
@@ -208,3 +208,4 @@ A ready-made library, but it adds a dependency for about 40 lines of code, which
   2. **`historyStore` rewritten.** Its `undo` expected the caller to push onto the redo stack but offered no way to do so; it now takes the current plan and manages both stacks itself. Snapshots no longer carry a timestamp.
   3. **AC-07 corrected during implementation:** it asked for Ctrl+Z after a reload, which NON-03 rules out. It now checks undo/redo of the drag and, separately, that the dragged position survives a reload.
   4. **Room labels ignore clicks (pre-existing).** The room's name and area text caught clicks in the middle of a room, so clicking there did not select it. The label group is now `listening={false}`, as CLAUDE.md asks for non-interactive shapes.
+- 2026-10-23: FDD-0007 changed 4.1 step 6: opening a file, starting a new project and switching options clear the history.

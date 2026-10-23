@@ -144,13 +144,15 @@ export const translations = {
     categoryStructural: 'Structural',
 
     // Tabs
-    newTab: 'New Tab',
-    closeTab: 'Close Tab',
+    newTab: 'New option',
+    closeTab: 'Close option',
+    duplicateTab: 'Duplicate option',
+    defaultOptionName: 'Option',
     room: 'Room',
 
     // Dialogs
     confirmNewProject: 'Create a new project? Unsaved changes will be lost.',
-    confirmCloseTab: 'Close this tab? Unsaved changes will be lost.',
+    confirmCloseOption: 'Close this option? It will be lost.',
     failedToLoad: 'Failed to load project file',
 
     // Drawing
@@ -370,13 +372,15 @@ export const translations = {
     categoryStructural: 'Estrutural',
 
     // Tabs
-    newTab: 'Nova aba',
-    closeTab: 'Fechar aba',
+    newTab: 'Nova opção',
+    closeTab: 'Fechar opção',
+    duplicateTab: 'Duplicar opção',
+    defaultOptionName: 'Opção',
     room: 'Cômodo',
 
     // Dialogs
     confirmNewProject: 'Criar um novo projeto? As alterações não salvas serão perdidas.',
-    confirmCloseTab: 'Fechar esta aba? As alterações não salvas serão perdidas.',
+    confirmCloseOption: 'Fechar esta opção? Ela será perdida.',
     failedToLoad: 'Falha ao carregar o arquivo do projeto',
 
     // Drawing

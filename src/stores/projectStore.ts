@@ -59,7 +59,6 @@ interface ProjectState {
   // Project actions
   setProjectName: (name: string) => void;
   clearProject: () => void;
-  loadProject: (data: { rooms: Room[]; objects: FloorObject[]; dimensionLines: DimensionLine[]; lot?: Lot }) => void;
 
   // Lot actions (FDD-0004)
   /** Creates or replaces the lot. Callers validate it first with `validateLot`. */
@@ -277,15 +276,6 @@ export const useProjectStore = create<ProjectState>()(
 
       clearProject: () => {
         set(createDefaultProject());
-      },
-
-      loadProject: (data) => {
-        set({
-          rooms: data.rooms,
-          objects: data.objects,
-          dimensionLines: data.dimensionLines,
-          lot: data.lot,
-        });
       },
 
       setLot: (lot) => {

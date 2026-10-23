@@ -77,3 +77,15 @@ export function redo(): void {
   const next = useHistoryStore.getState().redo(snapshotOf(useProjectStore.getState()));
   if (next) restore(next);
 }
+
+/**
+ * Empties undo and redo and starts the next change as a fresh step.
+ *
+ * @remarks
+ * Used when the whole plan is replaced (switching option, opening or starting a project),
+ * where undoing would mix plans that no longer belong together.
+ */
+export function resetHistory(): void {
+  useHistoryStore.getState().clearHistory();
+  lastChangeAt = Number.NEGATIVE_INFINITY;
+}

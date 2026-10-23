@@ -248,3 +248,4 @@ Rejected: the father should be free to sketch, and the architect may know of exc
   4. **Setback warning outranks selection colour:** a crossing room stays red while selected, so it is visible as the user drags it back inside.
   5. **Helpers added:** `formatPercent` and `formatLengthForInput` in `format.ts`; `LOT_OUTLINE_NAME` and `DEFAULT_LOT_CM` in constants. Percentages print as Intl gives them for pt-BR (`27,3%`, no space).
   6. **Measurement note shown once.** With both the programme table (FDD-0003) and the lot figures on screen the note appeared twice; it now renders once, after the lot section, whenever there are rooms or a lot.
+- 2026-10-23: Item 1 resolved by FDD-0007: tabs now hold separate plan options, each with its own lot.

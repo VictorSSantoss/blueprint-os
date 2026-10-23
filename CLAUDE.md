@@ -128,6 +128,7 @@ Each feature in the priority list gets an FDD before code starts:
 - `0004` lot and setbacks
 - `0005` architect export
 - `0006` undo and redo (added; done before 0005)
+- `0007` plan options in tabs (added; done before 0005)
 
 ### No backend
 BlueprintOS has no backend. In Section 5 of every FDD, replace the backend sub-sections with **5.5 Persistence** — saved project JSON schema changes and backward-compatibility for older files.
