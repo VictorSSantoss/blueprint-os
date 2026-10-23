@@ -457,7 +457,6 @@ function ProgrammeTable() {
           {t('roomsWithTarget').replace('{count}', String(withTarget)).replace('{total}', String(rows.length))}
         </p>
       )}
-      <p className="mt-2 text-xs text-ink-faint">{t('areaMeasurementNote')}</p>
     </div>
   );
 }
@@ -610,8 +609,6 @@ function LotSection() {
           {t('outsideSetback')} {figures.outside.map((r) => r.name || t('room')).join(', ')}
         </p>
       )}
-      <p className="mt-2 text-xs text-ink-faint">{t('areaMeasurementNote')}</p>
-
       <button
         onClick={() => confirm(t('confirmRemoveLot')) && removeLot()}
         className="mt-2 text-xs text-ember hover:underline"
@@ -623,7 +620,7 @@ function LotSection() {
 }
 
 function RoomStatistics() {
-  const { rooms, objects } = useProjectStore();
+  const { rooms, objects, lot } = useProjectStore();
   const { t } = useSettingsStore();
 
   const { totalAreaCm2, totalPerimeterCm, completedRoomCount } = useMemo(() => {
@@ -668,6 +665,11 @@ function RoomStatistics() {
       {completedRoomCount > 0 && <ProgrammeTable />}
 
       <LotSection />
+
+      {/* One note for both the programme table and the lot figures. */}
+      {(completedRoomCount > 0 || lot) && (
+        <p className="text-xs text-ink-faint">{t('areaMeasurementNote')}</p>
+      )}
 
       {rooms.length === 0 && (
         <div className="mt-4 p-3 bg-hover rounded-lg text-sm text-ink-secondary">
