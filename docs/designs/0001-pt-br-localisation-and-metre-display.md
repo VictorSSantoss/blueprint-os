@@ -20,7 +20,7 @@ related_adrs: ["ADR-0003"]
 
 ## 1. Summary
 
-Add Brazilian Portuguese as the default language and replace raw `.toFixed(2)` number formatting with `Intl.NumberFormat('pt-BR')` so that all areas and lengths display in the correct Brazilian decimal format (comma as separator: `12,60 m²`, `3,45 m`). This is the minimum required for Victor's father to use the application comfortably.
+Add Brazilian Portuguese as the default language and replace raw `.toFixed(2)` number formatting with `Intl.NumberFormat('pt-BR')` so that all areas and lengths display in the correct Brazilian decimal format (comma as separator: `12,60 m²`, `3,45 m`).
 
 ## 2. Background and current state
 
@@ -32,7 +32,7 @@ Area and length values are already converted from centimetres to metres in `Prop
 
 ### 2.2 Problem
 
-The father's browser is configured for pt-BR. The app shows English strings and English-locale numbers. Both are wrong.
+The user's browser is configured for pt-BR. The app shows English strings and English-locale numbers. Both are wrong.
 
 ### 2.3 Constraints
 
@@ -51,9 +51,9 @@ The father's browser is configured for pt-BR. The app shows English strings and 
 
 ### 3.2 Non-objectives
 
-- **NON-01**: Furniture object dimension inputs (width/depth/height in cm) remain in centimetres. The father draws rooms by clicking on the canvas; he does not type furniture sizes.
+- **NON-01**: Furniture object dimension inputs (width/depth/height in cm) remain in centimetres. The user draws rooms by clicking on the canvas and does not type furniture sizes.
 - **NON-02**: Accepting a comma as a decimal separator in numeric inputs. No room-dimension text inputs exist yet; this is deferred to FDD-0003.
-- **NON-03**: A language-switching UI. The language selector is hidden; pt-BR is the only language the father uses. The `en` locale is kept in the codebase for developer readability.
+- **NON-03**: A language-switching UI. The language selector is hidden; pt-BR is the only active language. The `en` locale is kept in the codebase for developer readability.
 
 ## 4. User experience (guide-level)
 
@@ -179,7 +179,7 @@ No project JSON schema change. `settingsStore` persist key renamed: `'floor-make
 
 ### 6.1 Keep `tr` translations alongside `pt-BR`
 
-- **Why rejected:** Turkish adds 184 strings of maintenance weight the project will never need. The father does not read Turkish.
+- **Why rejected:** Turkish adds 184 strings of maintenance weight the project will never need.
 
 ### 6.2 Use a third-party i18n library (i18next, react-intl)
 

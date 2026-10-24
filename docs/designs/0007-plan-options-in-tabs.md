@@ -19,7 +19,7 @@ related_adrs: []
 
 ## 1. Summary
 
-Make the tab bar work, with each tab holding one *option* (alternative) of the same house: `Opção 1`, `Opção 2`, … The father can duplicate an option to try a variant ("what if the kitchen is bigger?"), switch between options to compare, rename and close them. Each option has its own rooms, furniture, dimension lines and lot. All options are saved in the project file, so he can take every alternative to the architect.
+Make the tab bar work, with each tab holding one *option* (alternative) of the same house: `Opção 1`, `Opção 2`, … The user can duplicate an option to try a variant ("what if the kitchen is bigger?"), switch between options to compare, rename and close them. Each option has its own rooms, furniture, dimension lines and lot. All options are saved in the project file, so they can take every alternative to the architect.
 
 ## 2. Background and current state
 
@@ -29,7 +29,7 @@ Make the tab bar work, with each tab holding one *option* (alternative) of the s
 
 ### 2.2 Problem
 
-The tabs look like a feature but do nothing, which is confusing. Meanwhile the father has a real need they could serve: comparing alternative layouts without overwriting the one he has.
+The tabs look like a feature but do nothing, which is confusing. Meanwhile the user has a real need they could serve: comparing alternative layouts without overwriting the one they have.
 
 ### 2.3 Constraints
 
@@ -61,7 +61,7 @@ The tabs look like a feature but do nothing, which is confusing. Meanwhile the f
 
 ### 4.1 Interaction flow
 
-1. The father opens the app and sees one tab, *Opção 1*, with his plan.
+1. The user opens the app and sees one tab, *Opção 1*, with their plan.
 2. He clicks *Duplicar* (copy icon on the active tab). *Opção 2* appears, identical, and becomes active.
 3. In *Opção 2* he enlarges the kitchen. *Opção 1* is untouched; he clicks it to compare, then back.
 4. He double-clicks *Opção 2* and renames it *Cozinha maior*.
@@ -163,7 +163,7 @@ The smallest change, and honest. Rejected because comparing alternatives is a re
 
 ### 6.2 Tabs as separate projects (different houses)
 
-What the upstream code seems to have aimed at. Rejected: the father plans one house, and separate projects are already handled by saving and opening files.
+What the upstream code seems to have aimed at. Rejected: the user plans one house, and separate projects are already handled by saving and opening files.
 
 ## 7. Cross-cutting concerns
 

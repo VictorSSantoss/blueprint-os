@@ -29,7 +29,7 @@ There is no lot. The canvas is an infinite grid; rooms can be drawn anywhere. Pr
 
 ### 2.2 Problem
 
-The father knows his lot (for example 12 × 30 m, front setback 5 m, sides 1,5 m, back 3 m) but cannot see it while drawing, so he cannot tell whether the house fits or how much of the lot it uses.
+The user knows their lot (for example 12 × 30 m, front setback 5 m, sides 1,5 m, back 3 m) but cannot see it while drawing, so they cannot tell whether the house fits or how much of the lot it uses.
 
 ### 2.3 Constraints
 
@@ -161,7 +161,7 @@ Handles irregular lots, but setbacks on a polygon need polygon offsetting, and "
 
 ### 6.2 Block rooms from crossing setbacks
 
-Rejected: the father should be free to sketch, and the architect may know of exceptions (e.g. a garage allowed in the front setback). A warning is enough (NON-04).
+Rejected: the user should be free to sketch, and the architect may know of exceptions (e.g. a garage allowed in the front setback). A warning is enough (NON-04).
 
 ## 7. Cross-cutting concerns
 

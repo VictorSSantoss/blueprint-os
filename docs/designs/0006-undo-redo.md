@@ -21,7 +21,7 @@ related_adrs: []
 
 ## 1. Summary
 
-Make *Desfazer* and *Refazer* work. Every change to the plan (rooms, walls, objects, lot, targets, names) can be undone with Ctrl+Z (⌘Z on Mac) or the header button, and redone with Ctrl+Shift+Z / Ctrl+Y or the other button. Rapid bursts, such as typing a room name or resizing a piece of furniture, undo as one step. This lets the father experiment without fear of breaking his plan.
+Make *Desfazer* and *Refazer* work. Every change to the plan (rooms, walls, objects, lot, targets, names) can be undone with Ctrl+Z (⌘Z on Mac) or the header button, and redone with Ctrl+Shift+Z / Ctrl+Y or the other button. Rapid bursts, such as typing a room name or resizing a piece of furniture, undo as one step. This lets the user experiment without fear of breaking their plan.
 
 ## 2. Background and current state
 
@@ -61,7 +61,7 @@ A wrong drag, an accidental *Excluir* or a bad lot value cannot be reverted. For
 
 ### 4.1 Interaction flow
 
-1. The father deletes a room by mistake and presses Ctrl+Z (or clicks the ↶ button). The room comes back.
+1. The user deletes a room by mistake and presses Ctrl+Z (or clicks the ↶ button). The room comes back.
 2. He presses Ctrl+Shift+Z (or ↷). It is deleted again.
 3. He types *Quarto do casal* in the room name, then presses Ctrl+Z outside the field. The whole name change is undone in one step.
 4. He drags a shared wall (FDD-0002). One Ctrl+Z puts both rooms back.

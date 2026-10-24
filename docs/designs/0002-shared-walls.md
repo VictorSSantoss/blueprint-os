@@ -31,7 +31,7 @@ Room corners are snapped to the grid (`snapPointToGrid`) but not to other rooms'
 
 ### 2.2 Problem
 
-The father will sketch a house with 6–10 rooms. Every time he adjusts one room's size the walls of adjacent rooms tear open. Without shared-wall behaviour the tool is unusable for its purpose.
+The user will sketch a house with 6–10 rooms. Every time they adjust one room's size the walls of adjacent rooms tear open. Without shared-wall behaviour the tool is unusable for its purpose.
 
 ### 2.3 Constraints
 
@@ -234,7 +234,7 @@ Explicit links would survive position changes (the link survives even if both ro
 
 ### 6.3 Snap only during drawing, not during drag
 
-Simpler, but the father will need to reposition rooms after the initial sketch. Snap-on-drag is the primary way he creates new shared walls.
+Simpler, but the user will need to reposition rooms after the initial sketch. Snap-on-drag is the primary way they create new shared walls.
 
 ## 7. Cross-cutting concerns
 

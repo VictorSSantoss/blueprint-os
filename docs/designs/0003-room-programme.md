@@ -29,7 +29,7 @@ Let the homeowner write down how big each room *should* be (the *programa de nec
 
 ### 2.2 Problem
 
-The father knows the sizes he wants ("quarto do casal com uns 14 m²") but has to keep them in his head or on paper and compare by hand. Every new room is also called "Room", so a list of rooms would be unreadable.
+The user knows the sizes they want ("quarto do casal com uns 14 m²") but has to keep them in mind or on paper and compare by hand. Every new room is also called "Room", so a list of rooms would be unreadable.
 
 ### 2.3 Constraints
 
@@ -60,7 +60,7 @@ The father knows the sizes he wants ("quarto do casal com uns 14 m²") but has t
 
 ### 4.1 Interaction flow
 
-1. The father draws a room; it appears as `Cômodo 3`.
+1. The user draws a room; it appears as `Cômodo 3`.
 2. He selects it and renames it `Quarto do casal` in *Nome do cômodo* (existing field).
 3. In the new *Área desejada (m²)* field he types `14`. The panel shows:
    - *Área desejada* `14,00 m²`
