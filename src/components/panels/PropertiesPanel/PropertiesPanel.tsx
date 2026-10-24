@@ -9,6 +9,7 @@ import { Trash2Icon, RotateCwIcon, CopyIcon } from 'lucide-react';
 import type { FloorObject, Lot, Room } from '../../../types';
 import type { TranslationKey } from '../../../i18n';
 import { getLocalizedObjectName } from '../../../utils/objectNames';
+import { fitViewToPlan } from '../../../stores/tabs';
 
 function TargetAreaField({ room, areaCm2 }: { room: Room; areaCm2: number }) {
   const { updateRoom } = useProjectStore();
@@ -539,14 +540,15 @@ function LotSection() {
       <div>
         <h4 className="text-xs font-medium text-ink-secondary uppercase mb-2">{t('lot')}</h4>
         <button
-          onClick={() =>
+          onClick={() => {
             setLot({
               origin: { x: 0, y: 0 },
               width: DEFAULT_LOT_CM.width,
               depth: DEFAULT_LOT_CM.depth,
               setbacks: { ...DEFAULT_LOT_CM.setbacks },
-            })
-          }
+            });
+            fitViewToPlan();
+          }}
           className="w-full px-3 py-1.5 text-sm rounded bg-teal text-ink-inverse hover:bg-teal-deep"
         >
           {t('defineLot')}
@@ -555,9 +557,9 @@ function LotSection() {
     );
   }
 
-  const fields: { id: string; label: TranslationKey; value: number; apply: (cm: number) => Lot }[] = [
-    { id: 'lot-width', label: 'lotWidth', value: lot.width, apply: (cm) => ({ ...lot, width: cm }) },
-    { id: 'lot-depth', label: 'lotDepth', value: lot.depth, apply: (cm) => ({ ...lot, depth: cm }) },
+  const fields: { id: string; label: TranslationKey; value: number; apply: (cm: number) => Lot; refits?: boolean }[] = [
+    { id: 'lot-width', label: 'lotWidth', value: lot.width, apply: (cm) => ({ ...lot, width: cm }), refits: true },
+    { id: 'lot-depth', label: 'lotDepth', value: lot.depth, apply: (cm) => ({ ...lot, depth: cm }), refits: true },
     { id: 'lot-front', label: 'setbackFront', value: lot.setbacks.front, apply: (cm) => ({ ...lot, setbacks: { ...lot.setbacks, front: cm } }) },
     { id: 'lot-back', label: 'setbackBack', value: lot.setbacks.back, apply: (cm) => ({ ...lot, setbacks: { ...lot.setbacks, back: cm } }) },
     { id: 'lot-left', label: 'setbackLeft', value: lot.setbacks.left, apply: (cm) => ({ ...lot, setbacks: { ...lot.setbacks, left: cm } }) },
@@ -579,6 +581,7 @@ function LotSection() {
               const err = validateLot(next);
               if (err) return err;
               setLot(next);
+              if (f.refits) fitViewToPlan();
               return null;
             }}
           />

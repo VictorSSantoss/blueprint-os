@@ -89,6 +89,14 @@ describe('autosave', () => {
     expect(useCloudStore.getState()).toMatchObject({ status: 'saved', dirty: false });
   });
 
+  it('[FDD-0008 / OBJ-04] shows the plan as saving from the change until the save completes', async () => {
+    useCloudStore.setState({ status: 'saved' });
+
+    addRoom();
+
+    expect(useCloudStore.getState().status).toBe('saving');
+  });
+
   it('[FDD-0008 / OBJ-03] joins a burst of changes into one save', async () => {
     addRoom();
     await settle(1000);

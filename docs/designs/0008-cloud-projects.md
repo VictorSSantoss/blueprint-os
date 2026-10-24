@@ -239,7 +239,7 @@ Real Google sign-in cannot run in the automated browser, so AC-01, AC-03 and AC-
 
 ### 8.4 Definition of done
 
-- [ ] Neon project, Neon Auth with Google, `projects` table and Vercel environment variables set up (Victor, with step-by-step instructions).
+- [x] Neon project, Neon Auth with Google, `projects` table and Vercel environment variables set up (Victor, with step-by-step instructions).
 - [x] API with the shared guard, and its tests.
 - [x] Sign-in/out, autosave with status, *Meus projetos*, first-upload migration.
 - [x] Offline fallback and retry.
@@ -273,3 +273,5 @@ Real Google sign-in cannot run in the automated browser, so AC-01, AC-03 and AC-
   - **Default vanilla auth adapter** instead of the React adapter; sign-in state lives in `cloudStore`. The JWT is read from the session (§5.4).
   - **`api/` imports shared code with `.js` extensions** (`src/utils/projectFile.ts` → `./lot.js`), which Vite, TypeScript and Node's ES module loader all resolve.
   - **Google stays on Neon's shared keys.** The OAuth redirect goes through Neon's shared callback, so no Google Cloud project is needed.
+- 2026-10-24: Deployed. Verified on the production site: Google sign-in, autosave with *Salvo na nuvem* (AC-01, AC-02), and *Este e-mail não tem acesso.* for an account not on the list (AC-04). The token is read from the session as designed; no change was needed.
+- 2026-10-24: Two fixes after the first real use. The header showed *Salvo na nuvem* during the 2 s before a change was sent; it now shows *Salvando…* from the moment of the change. Opening a project (cloud, file or *Novo projeto*) now fits the view to the whole plan, lot included (`fitViewToPlan` in `stores/tabs.ts`); switching between options keeps the view so they stay easy to compare.

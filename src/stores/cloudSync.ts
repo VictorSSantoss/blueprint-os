@@ -109,7 +109,9 @@ export async function saveNow(): Promise<void> {
 export function startCloudSync(): () => void {
   const onChange = () => {
     if (isLoading) return;
-    useCloudStore.setState({ dirty: true });
+    const { email } = useCloudStore.getState();
+    // While a save is pending the header must not keep claiming the plan is saved.
+    useCloudStore.setState(email ? { dirty: true, status: 'saving' } : { dirty: true });
     schedule();
   };
   const onOnline = () => schedule(0);

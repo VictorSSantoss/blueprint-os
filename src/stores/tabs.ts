@@ -12,9 +12,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { useProjectStore } from './projectStore';
 import { useSelectionStore } from './selectionStore';
 import { useTabsStore, type Tab } from './tabsStore';
+import { useCanvasStore } from './canvasStore';
+import { useCanvasRefStore } from './canvasRefStore';
 import type { PlanSnapshot } from './historyStore';
 import { resetHistory } from './history';
 import { nextRoomName } from '../utils/programme';
+import { fitViewport, planBounds } from '../utils/viewport';
 
 const emptyPlan = (): PlanSnapshot => ({ rooms: [], objects: [], dimensionLines: [], lot: undefined });
 
@@ -155,6 +158,21 @@ export function optionsForSave(): { options: { name: string; plan: PlanSnapshot 
 }
 
 /**
+ * Zooms and pans so the whole plan on screen, lot included, is visible and centred.
+ *
+ * @remarks
+ * An empty plan resets the view. Does nothing before the canvas exists, e.g. at startup,
+ * where the saved view is kept.
+ */
+export function fitViewToPlan(): void {
+  const stage = useCanvasRefStore.getState().stageRef;
+  if (!stage) return;
+  const bounds = planBounds(currentPlan());
+  if (!bounds) return useCanvasStore.getState().resetView();
+  useCanvasStore.setState({ viewport: fitViewport(bounds, stage.width(), stage.height()) });
+}
+
+/**
  * Replaces every option, as when opening a file or starting a new project.
  *
  * @param options - At least one option.
@@ -164,4 +182,5 @@ export function replaceAllTabs(options: { name: string; plan: PlanSnapshot }[], 
   const tabs = options.map((o) => ({ id: uuidv4(), name: o.name, plan: o.plan }));
   useTabsStore.setState({ tabs, activeTabId: tabs[activeOption].id });
   loadPlan(tabs[activeOption].plan);
+  fitViewToPlan();
 }

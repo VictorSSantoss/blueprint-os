@@ -8,6 +8,8 @@ export const DEFAULT_GRID_SIZE = 10;
 export const MIN_ZOOM = 0.1;
 export const MAX_ZOOM = 4.0;
 export const ZOOM_STEP = 0.1;
+/** Empty space kept around the plan when the view is fitted to it, in screen pixels. */
+export const FIT_MARGIN_PX = 40;
 
 // Canvas constants
 export const PIXELS_PER_CM = 2; // 1cm = 2px at zoom level 1

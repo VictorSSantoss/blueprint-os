@@ -249,3 +249,4 @@ Rejected: the user should be free to sketch, and the architect may know of excep
   5. **Helpers added:** `formatPercent` and `formatLengthForInput` in `format.ts`; `LOT_OUTLINE_NAME` and `DEFAULT_LOT_CM` in constants. Percentages print as Intl gives them for pt-BR (`27,3%`, no space).
   6. **Measurement note shown once.** With both the programme table (FDD-0003) and the lot figures on screen the note appeared twice; it now renders once, after the lot section, whenever there are rooms or a lot.
 - 2026-10-23: Item 1 resolved by FDD-0007: tabs now hold separate plan options, each with its own lot.
+- 2026-10-24: Defining the lot, or changing its width or depth, fits the view to the whole plan, so the user no longer has to zoom out and pan to find it. Setback changes and dragging the lot keep the current view.
