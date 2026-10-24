@@ -10,6 +10,11 @@ import {
   RulerIcon,
   TagIcon,
   HelpCircleIcon,
+  CloudIcon,
+  CloudOffIcon,
+  LoaderCircleIcon,
+  LogInIcon,
+  LogOutIcon,
 } from 'lucide-react';
 import logoSvg from '../../assets/logo.svg';
 import { useCanvasStore, useProjectStore, useHistoryStore, useSettingsStore, useCanvasRefStore } from '../../stores';
@@ -18,6 +23,10 @@ import { undo, redo } from '../../stores/history';
 import { parseProjectFile, serializeProject } from '../../utils/projectFile';
 import { currentPlan, optionsForSave, replaceAllTabs } from '../../stores/tabs';
 import { useToast } from '../Toast';
+import { authClient } from '../../lib/auth';
+import { useCloudStore } from '../../stores/cloudStore';
+import { detachCloudProject, signIn, signOut } from '../../stores/cloudSync';
+import { ProjectsDialog } from './ProjectsDialog';
 
 export function Header() {
   const { name, setProjectName, clearProject, rooms, objects } = useProjectStore();
@@ -29,6 +38,8 @@ export function Header() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(name);
   const [isExporting, setIsExporting] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
+  const { email, status } = useCloudStore();
 
   const handleSaveName = () => {
     setProjectName(editedName);
@@ -37,6 +48,7 @@ export function Header() {
 
   const handleNewProject = () => {
     if (confirm(t('confirmNewProject'))) {
+      detachCloudProject();
       clearProject();
       replaceAllTabs([{ name: `${t('defaultOptionName')} 1`, plan: currentPlan() }], 0);
     }
@@ -66,6 +78,7 @@ export function Header() {
       try {
         const text = await file.text();
         const { name, options, activeOption } = parseProjectFile(JSON.parse(text), t('defaultOptionName'));
+        detachCloudProject();
         replaceAllTabs(options, activeOption);
         if (name) {
           setProjectName(name);
@@ -217,6 +230,50 @@ export function Header() {
           <TagIcon className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Cloud (FDD-0008) */}
+      {authClient && (
+        <>
+          <div className="w-px h-6 bg-line-header" />
+          <div className="flex items-center gap-2 text-xs">
+            {status === 'saving' && (
+              <span className="flex items-center gap-1 text-ink-faint">
+                <LoaderCircleIcon className="w-3.5 h-3.5 animate-spin" />
+                {t('cloudSaving')}
+              </span>
+            )}
+            {status === 'saved' && (
+              <span className="flex items-center gap-1 text-ink-faint">
+                <CloudIcon className="w-3.5 h-3.5" />
+                {t('cloudSaved')}
+              </span>
+            )}
+            {status === 'offline' && (
+              <span className="flex items-center gap-1 text-amber-400">
+                <CloudOffIcon className="w-3.5 h-3.5" />
+                {t('cloudOffline')}
+              </span>
+            )}
+            {status === 'denied' && <span className="text-red-300">{t('cloudAccessDenied')}</span>}
+            {email ? (
+              <>
+                <button onClick={() => setShowProjects(true)} className="px-2 py-1 hover:bg-header-hover rounded">
+                  {t('myProjects')}
+                </button>
+                <button onClick={signOut} className="p-2 hover:bg-header-hover rounded" title={`${t('signOut')} (${email})`}>
+                  <LogOutIcon className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <button onClick={signIn} className="flex items-center gap-1 px-2 py-1 hover:bg-header-hover rounded">
+                <LogInIcon className="w-4 h-4" />
+                {t('signIn')}
+              </button>
+            )}
+          </div>
+        </>
+      )}
+      {showProjects && <ProjectsDialog onClose={() => setShowProjects(false)} />}
 
       {/* Help */}
       <button className="p-2 hover:bg-header-hover rounded" title={t('help')}>

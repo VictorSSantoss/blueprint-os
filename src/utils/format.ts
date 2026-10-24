@@ -95,3 +95,17 @@ const PERCENT_FORMATTER = new Intl.NumberFormat('pt-BR', {
 export function formatPercent(fraction: number): string {
   return PERCENT_FORMATTER.format(fraction);
 }
+
+const DATE_TIME_FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+/**
+ * Formats a timestamp as a pt-BR date and time in the browser's time zone.
+ *
+ * @param iso - ISO 8601 timestamp, e.g. a project's `updatedAt`.
+ * @returns Formatted string, e.g. `"23/10/2026, 09:00"`.
+ * @example
+ * formatDateTime('2026-10-23T12:00:00Z') // → "23/10/2026, 09:00" in São Paulo
+ */
+export function formatDateTime(iso: string): string {
+  return DATE_TIME_FORMATTER.format(new Date(iso));
+}

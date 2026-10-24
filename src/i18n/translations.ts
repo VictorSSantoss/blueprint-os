@@ -155,6 +155,18 @@ export const translations = {
     confirmCloseOption: 'Close this option? It will be lost.',
     failedToLoad: 'Failed to load project file',
 
+    // Cloud (FDD-0008)
+    signIn: 'Sign in with Google',
+    signOut: 'Sign out',
+    myProjects: 'My projects',
+    cloudSaving: 'Saving…',
+    cloudSaved: 'Saved to the cloud',
+    cloudOffline: 'Not saved — offline',
+    cloudAccessDenied: 'This email does not have access.',
+    cloudNoProjects: 'No projects in the cloud yet.',
+    cloudError: 'Could not reach the cloud.',
+    close: 'Close',
+
     // Drawing
     clickToClose: 'Click to close',
     clickToStartDrawing: 'Click to start drawing',
@@ -382,6 +394,18 @@ export const translations = {
     confirmNewProject: 'Criar um novo projeto? As alterações não salvas serão perdidas.',
     confirmCloseOption: 'Fechar esta opção? Ela será perdida.',
     failedToLoad: 'Falha ao carregar o arquivo do projeto',
+
+    // Cloud (FDD-0008)
+    signIn: 'Entrar com Google',
+    signOut: 'Sair',
+    myProjects: 'Meus projetos',
+    cloudSaving: 'Salvando…',
+    cloudSaved: 'Salvo na nuvem',
+    cloudOffline: 'Não salvo — sem conexão',
+    cloudAccessDenied: 'Este e-mail não tem acesso.',
+    cloudNoProjects: 'Nenhum projeto na nuvem ainda.',
+    cloudError: 'Não foi possível acessar a nuvem.',
+    close: 'Fechar',
 
     // Drawing
     clickToClose: 'Clique para fechar',

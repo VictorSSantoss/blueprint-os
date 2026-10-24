@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Secrets (FDD-0008): *.local above already covers .env.local; this
+# also catches a plain .env and any other .env.* variant.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

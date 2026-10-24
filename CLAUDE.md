@@ -15,13 +15,14 @@ Forked from [ahmethakanbesel/floor-maker](https://github.com/ahmethakanbesel/flo
 - Zustand 5 for state (Immer is installed but unused). Undo/redo: `stores/history.ts` records plan changes into `historyStore.ts` (FDD-0006).
 - jsPDF for PDF export, lucide-react for icons, framer-motion for UI motion
 - **npm, not Bun.** Upstream scripts use `bunx --bun`; rewritten to plain `vite` / `tsc` commands.
-- Fully static, no backend. Projects save as JSON files and autosave to the browser. Deployed to Vercel's free tier.
+- Deployed to Vercel's free tier. Projects autosave to the browser, download as JSON files and, when signed in with Google, save to Neon Postgres through a small API in `api/` (Vercel functions, ADR-0004, FDD-0008). Neon Auth for sign-in, `jose` to verify its tokens, `@neondatabase/serverless` as the database driver.
 
 ## Commands
 
 ```bash
 npm install
-npm run dev       # http://localhost:5173
+npm run dev       # http://localhost:5173 (no /api; cloud saving shows as offline)
+npx vercel dev    # app and API together; needs .env.local (see .env.example)
 npm run build     # tsc -b && vite build
 npm run lint
 npm test          # vitest run
@@ -38,6 +39,9 @@ Before calling a change done, run `npm run build` (it type-checks) and `npm test
 - `src/components/panels/`, `layout/`, `ui/`: the Tailwind UI around the canvas
 - `src/i18n/translations.ts`: every user-facing string
 - `src/constants/`: grid, zoom, wall and colour constants
+- `src/lib/auth.ts`, `src/stores/cloudSync.ts`: Google sign-in and cloud autosave (FDD-0008)
+- `api/`: Vercel functions; `api/_lib/guard.ts` holds the token, allow-list and body checks every route runs first
+- `db/schema.sql`: the `projects` table
 
 ## Domain rules
 
@@ -129,9 +133,14 @@ Each feature in the priority list gets an FDD before code starts:
 - `0005` architect export
 - `0006` undo and redo (added; done before 0005)
 - `0007` plan options in tabs (added; done before 0005)
+- `0008` cloud projects (added; done before 0005)
 
-### No backend
-BlueprintOS has no backend. In Section 5 of every FDD, replace the backend sub-sections with **5.5 Persistence** — saved project JSON schema changes and backward-compatibility for older files.
+### Backend and persistence
+The only backend is the cloud-projects API (ADR-0004). It stores the same version 1.1 project file the app downloads, so the file format is the one data model. In Section 5 of every FDD, use **5.5 Persistence** for project file changes, backward-compatibility for older files and any change to the API or the `projects` table.
+
+- `DATABASE_URL` and `ALLOWED_EMAILS` are server-only: reference them only from `api/`, never from `src/` (Vite would ship them to the browser). Only `VITE_`-prefixed variables reach the browser.
+- Secrets live in `.env.local` (gitignored) and in Vercel's settings. `.env.example` is the committed template with no values.
+- Every API route goes through `route()` in `api/_lib/route.ts`; no query runs before the token, verified-email and allow-list checks pass.
 
 ### Documentation language
 Engineering docs (README, FDDs, ADRs) are in English. UI element names use pt-BR labels where helpful (e.g., *Programa de necessidades*). User-facing guides, if any, are in pt-BR.

@@ -8,7 +8,7 @@
  */
 
 import type { PlanSnapshot } from '../stores/historyStore';
-import { parseSavedLot } from './lot';
+import { parseSavedLot } from './lot.js';
 
 export interface ProjectOption {
   name: string;

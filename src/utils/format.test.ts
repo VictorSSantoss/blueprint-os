@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatArea, formatLength, formatAreaForInput, formatLengthForInput, formatPercent } from './format';
+import { formatArea, formatLength, formatAreaForInput, formatLengthForInput, formatPercent, formatDateTime } from './format';
 
 describe('formatArea', () => {
   it('[FDD-0001 / AC-02] formats a 4×3 m room correctly', () => {
@@ -76,5 +76,13 @@ describe('formatLengthForInput', () => {
   it('[FDD-0004] shows a setback in metres without a unit', () => {
     expect(formatLengthForInput(150)).toBe('1,5');
     expect(formatLengthForInput(1200)).toBe('12');
+  });
+});
+
+describe('formatDateTime', () => {
+  it('formats day before month, as in Brazil', () => {
+    const result = formatDateTime('2026-10-05T15:00:00Z');
+
+    expect(result).toMatch(/^05\/10\/2026, \d{2}:\d{2}$/);
   });
 });
